@@ -14,7 +14,11 @@ class Note extends Model
     protected $fillable = [
         'title',
         'info',
-        'direction'
+        'input_at',
+        'show_checks',
+        'move_checked',
+        'sort_by',
+        'sort_direction'
     ];
 
     public function user(): BelongsTo

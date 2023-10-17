@@ -6,15 +6,16 @@ use App\Models\NoteItem;
 
 state([
     'id' => session('id'),
+    'note' => '',
     'title' => '',
     'info' => '',
-    'note' => '',
     'items' => '',
     'newItem' => '',
-    'direction' => '',
-    'checks' => true,
-    'moveChecked' => false,
-    'sortBy' => ''
+    'inputAt' => '',
+    'showChecks' => '',
+    'moveChecked' => '',
+    'sortBy' => '',
+    'sortDirection' => '',
 ]);
 
 // tells volt which layout to use
@@ -27,27 +28,10 @@ rules([
 ]);
 
 $getItems = function () {
-    $sorts = [
-        '' => NoteItem::where('note_id', $this->id)->get(),
-    ];
-
-    $this->direction == 'forward' ?
-        $this->items = NoteItem::where('note_id', $this->id)->get() :
-        $this->items = NoteItem::where('note_id', $this->id)->latest()->get();
-    // switch ($this->sortBy) {
-    //     case 'alpha':
-    //         $this->notes = Note::with('user')->orderBy('title', 'asc')->get();
-    //         break;
-    //     case 'alpha-desc':
-    //         $this->notes = Note::with('user')->orderBy('title', 'desc')->get();
-    //         break;
-    //     case 'chrono':
-    //         $this->notes = Note::with('user')->get();
-    //         break;
-    //     case 'chrono-desc':
-    //         $this->notes = Note::with('user')->latest()->get();
-    //         break;
-    // };
+    $this->items = NoteItem::where('note_id', $this->id)
+                    ->when($this->moveChecked, fn ($query) => $query->orderBy('checked'))
+                    ->orderBy($this->sortBy, $this->sortDirection)
+                    ->get();
 };
 
 mount(function () {
@@ -60,7 +44,6 @@ mount(function () {
         ]);
 
         $this->id = Note::with('user')->latest()->first()->id;
-        // dd($this->note);
 
         session()->flash('id', $this->id );
         return $this->redirect('note/'.$this->id, navigate: true);
@@ -68,15 +51,17 @@ mount(function () {
     } else {
         
         $this->note = Note::where('id', $this->id)->first();
-
-        
     }
         
     if ($this->note) {
         $this->id = $this->note->id;
         $this->title = $this->note->title;
         $this->info = $this->note->info;
-        $this->direction = $this->note->direction;
+        $this->inputAt = $this->note->input_at;
+        $this->showChecks = $this->note->show_checks;
+        $this->moveChecked = $this->note->move_checked;
+        $this->sortBy = $this->note->sort_by;
+        $this->sortDirection = $this->note->sort_direction;
     }
 
     $this->getItems();
@@ -102,21 +87,56 @@ $destroy = function (Note $note) {
     return $this->redirect('/dashboard', navigate: true);
 };
 
-$changeDirection = function () {
+$toggleInputAt = function () {
 
-    $this->direction == 'forward' ?
-        $this->direction = 'reverse' :
-        $this->direction = 'forward';
+    $this->inputAt == 'top' ?
+        $this->inputAt = 'bottom' :
+        $this->inputAt = 'top';
 
-    $this->note->update(['direction' => $this->direction]);
+    $this->note->update(['input_at' => $this->inputAt]);
+
     $this->getItems();
 };
 
 $toggleChecks = function () {
-    $this->checks = ! $this->checks;
+    $this->showChecks = ! $this->showChecks;
+    $this->note->update(['show_checks' => $this->showChecks]);
+    $this->getItems();
+};
+
+$toggleMoveChecked = function () {
+    $this->moveChecked = ! $this->moveChecked;
+    $this->note->update(['move_checked' => $this->moveChecked]);
+    $this->getItems();
+};
+
+$updateOrder = function ($items) {
+    foreach ($items as $item) {
+        NoteItem::find($item['value'])->update(['position' => $item['order']]);
+    }
+
+    $this->getItems();
+};
+
+$sort = function ($sortBy) {
+    if ($sortBy == $this->sortBy && $sortBy != 'position') {
+        $this->sortDirection == 'asc' ?
+            $this->sortDirection = 'desc' :
+            $this->sortDirection = 'asc';
+    } else {
+        $this->sortDirection = 'asc';
+    }
+
+    $this->sortBy = $sortBy;
+    $this->note->update(['sort_by' => $this->sortBy, 'sort_direction' => $this->sortDirection]);
+    $this->getItems();
 };
 
 on(['delete-item' => function () {
+    $this->getItems();
+}]);
+
+on(['check' => function () {
     $this->getItems();
 }]);
 
@@ -161,26 +181,35 @@ updated(['newItem' => $newItem ]);
             class="p-2 pb-5 dark:bg-gray-900 dark:text-gray-300"
             style="display: none;"
         >
+            <div class="text-center text-lg tracking-wider">Sorting</div>
             <div class="flex justify-between items-center">
-                |<button
+                <button
+                    wire:click="sort('title')"
                     class="py-1"
                 >alphabetical</button>
                 |<button
+                    wire:click="sort('created_at')"
                     class="py-1"
-                >chronological</button>|
+                >chronological</button>
+                |<button
+                    wire:click="sort('position')"
+                    class="py-1"
+                >draggable</button>
             </div>
-            <div class="flex justify-between items-center">
-                |<button
-                    wire:click="changeDirection"
-                    class="py-1"
-                >{{ $this->direction }}</button>
-                |<button
+            <div class="text-center text-lg tracking-wider mt-2">Settings</div>
+            <div class="flex flex-col justify-between">
+                <button
+                    wire:click="toggleInputAt"
+                    class="py-1 text-left"
+                >input at {{ $this->inputAt == 'top' ? 'bottom' : 'top' }}</button>
+                <button
                     wire:click="toggleChecks"
-                    class="py-1"
-                >checks</button>
-                |<button
-                    class="py-1"
-                >move checked</button>|
+                    class="py-1 text-left"
+                >{{ $this->showChecks ? 'hide' : 'show'}} checks</button>
+                <button
+                    wire:click="toggleMoveChecked"
+                    class="py-1 text-left"
+                >move checked to bottom</button>
             </div>
         </div>
         <textarea
@@ -191,7 +220,7 @@ updated(['newItem' => $newItem ]);
     </div>
     <div class="dark:text-gray-300 w-full py-2">
         <div>
-            @if($this->direction == 'reverse')
+            @if($this->inputAt == 'top')
             <x-text-input 
                 wire:model.blur="newItem"
                 placeholder="new item"
@@ -199,13 +228,18 @@ updated(['newItem' => $newItem ]);
             />
             @endif
         </div>
-        <div>
+        <div wire:sortable="updateOrder">
         @foreach($items as $item)
-            <livewire:notes.note-item :$item :key="$item->id" :checks="$this->checks"/>
+            <livewire:notes.note-item
+                wire:key="item-{{ $item->id }}"
+                :$item
+                :showChecks="$this->showChecks"
+                drag="{{ $this->sortBy == 'position' }}"
+            />
         @endforeach
         </div>
         <div>
-            @if($this->direction == 'forward')
+            @if($this->inputAt == 'bottom')
             <x-text-input 
                 wire:model.blur="newItem"
                 placeholder="new item"

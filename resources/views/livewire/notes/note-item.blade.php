@@ -7,10 +7,12 @@ state([
     'item' => '',
     'title' => '',
     'checked' => false,
-    
 ]);
 
-state(['checks' => true])->reactive();
+state([
+    'showChecks' => true,
+    'drag' => ''
+])->reactive();
 
 mount(function () {
     $this->title = $this->item->title;
@@ -25,13 +27,14 @@ $destroy = function () {
 $check = function () {
     $this->checked = ! $this->checked;
     $this->item->update(['checked' => $this->checked]);
+    $this->dispatch('check');
 };
 
 ?>
 
-<div class="flex justify-between items-center my-1">
+<div wire:sortable.item="{{ $this->item->id }}" class="flex justify-between items-center my-1">
     <div class="flex items-center">
-        @if($this->checks)
+        @if($this->showChecks)
         <button
             wire:click="check"
             class="{{$this->checked ? 'bg-green-800 border-green-800' : 'border-gray-600'}} h-5 w-5 text-sm border rounded-full mr-2 text-green-600"
@@ -43,6 +46,9 @@ $check = function () {
             class="border-none focus:border"
         />
     </div>
+    @if ($this->drag)
+    <button wire:sortable.handle>drag</button>
+    @endif
     <button
         wire:click="destroy"
         class="h-5 w-5 text-sm border rounded-full border-red-500 hover:bg-red-500 dark:text-red-500 dark:hover:text-gray-900 transition"
