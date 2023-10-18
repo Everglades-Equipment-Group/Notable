@@ -49,4 +49,9 @@ class User extends Authenticatable
         return $this->hasMany(Note::class);
     }
 
+    public function records(): HasMany
+    {
+        return $this->hasMany(Record::class);
+    }
+
 }

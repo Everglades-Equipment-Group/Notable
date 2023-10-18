@@ -11,10 +11,9 @@ class RecordEntry extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title',
+        'amount',
         'info',
-        'time',
-        'date'
+        'created_at',
     ];
 
     public function record(): BelongsTo

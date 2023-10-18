@@ -1,25 +1,23 @@
 <?php
 
 use function Livewire\Volt\{on, booted, updated, mount, layout, rules, state};
-use App\Models\Note;
-use App\Models\NoteItem;
+use App\Models\Record;
+use App\Models\RecordEntry;
 
 state([
     'id' => session('id'),
-    'note' => '',
+    'record' => '',
     'title' => '',
     'info' => '',
-    'items' => '',
-    'newItem' => '',
+    'units' => '',
+    'measuring' => '',
+    'entries' => '',
+    'newEntry' => '',
     'inputAt' => '',
-    'showChecks' => '',
-    'moveChecked' => '',
     'sortBy' => '',
     'sortDirection' => '',
 ]);
 
-// tells volt which layout to use
-// when using as full-page component
 layout('layouts.app');
 
 rules([
@@ -27,9 +25,8 @@ rules([
     'info' => 'string'
 ]);
 
-$getItems = function () {
-    $this->items = NoteItem::where('note_id', $this->id)
-                    ->when($this->moveChecked, fn ($query) => $query->orderBy('checked'))
+$getEntries = function () {
+    $this->entries = RecordEntry::where('record_id', $this->id)
                     ->orderBy($this->sortBy, $this->sortDirection)
                     ->get();
 };
@@ -38,90 +35,55 @@ mount(function () {
 
     if ($this->id == 0) {
 
-        auth()->user()->notes()->create([
-            'title' => 'New Note',
+        auth()->user()->records()->create([
+            'title' => 'New Record',
             'user_id' => auth()->user()->id
         ]);
 
-        $this->id = Note::with('user')->latest()->first()->id;
+        $this->id = Record::with('user')->latest()->first()->id;
 
         session()->flash('id', $this->id );
-        return $this->redirect('note/'.$this->id, navigate: true);
+        return $this->redirect('record/'.$this->id, navigate: true);
         
     } else {
         
-        $this->note = Note::where('id', $this->id)->first();
+        $this->record = Record::where('id', $this->id)->first();
     }
         
-    if ($this->note) {
-        $this->id = $this->note->id;
-        $this->title = $this->note->title;
-        $this->info = $this->note->info;
-        $this->inputAt = $this->note->input_at;
-        $this->showChecks = $this->note->show_checks;
-        $this->moveChecked = $this->note->move_checked;
-        $this->sortBy = $this->note->sort_by;
-        $this->sortDirection = $this->note->sort_direction;
+    if ($this->record) {
+        $this->id = $this->record->id;
+        $this->title = $this->record->title;
+        $this->info = $this->record->info;
+        $this->units = $this->record->units;
+        $this->measuring = $this->record->measuring;
+        $this->inputAt = $this->record->input_at;
+        $this->sortBy = $this->record->sort_by;
+        $this->sortDirection = $this->record->sort_direction;
     }
 
-    $this->getItems();
+    $this->getEntries();
 });
 
-$newItem = function () {
-
-    $this->note->noteItems()->create([
-        'title' => $this->newItem
-    ]);
-
-    $this->newItem = '';
-
-    $this->getItems();
-};
-
-$destroy = function (Note $note) {
+$destroy = function (Record $record) {
     
-    // $this->authorize('delete', $note);
-
-    $this->note->delete();
+    $this->record->delete();
 
     return $this->redirect('/dashboard', navigate: true);
 };
 
-$toggleInputAt = function () {
+$newEntry = function () {
 
-    $this->inputAt == 'top' ?
-        $this->inputAt = 'bottom' :
-        $this->inputAt = 'top';
+    $this->record->recordEntries()->create([
+        'amount' => $this->newEntry
+    ]);
 
-    $this->note->update(['input_at' => $this->inputAt]);
+    $this->newEntry = '';
 
-    $this->getItems();
-};
-
-$toggleChecks = function () {
-    $this->showChecks = ! $this->showChecks;
-    $this->note->update(['show_checks' => $this->showChecks]);
-    $this->getItems();
-};
-
-$toggleMoveChecked = function () {
-    $this->moveChecked = ! $this->moveChecked;
-    $this->note->update(['move_checked' => $this->moveChecked]);
-    $this->getItems();
-};
-
-$updateOrder = function ($items) {
-    foreach ($items as $item) {
-        NoteItem::find($item['value'])->update(['position' => $item['order']]);
-    }
-
-    // dd($items);
-
-    $this->getItems();
+    $this->getEntries();
 };
 
 $sort = function ($sortBy) {
-    if ($sortBy == $this->sortBy && $sortBy != 'position') {
+    if ($sortBy == $this->sortBy) {
         $this->sortDirection == 'asc' ?
             $this->sortDirection = 'desc' :
             $this->sortDirection = 'asc';
@@ -130,27 +92,34 @@ $sort = function ($sortBy) {
     }
 
     $this->sortBy = $sortBy;
-    $this->note->update([
+    $this->record->update([
         'sort_by' => $this->sortBy, 
         'sort_direction' => $this->sortDirection
     ]);
-    $this->getItems();
+    $this->getEntries();
 };
 
-on(['delete-item' => function () {
-    $this->getItems();
+$toggleInputAt = function () {
+
+    $this->inputAt == 'top' ?
+        $this->inputAt = 'bottom' :
+        $this->inputAt = 'top';
+
+    $this->record->update(['input_at' => $this->inputAt]);
+
+    $this->getEntries();
+};
+
+on(['delete-entry' => function () {
+    $this->getEntries();
 }]);
 
-on(['check' => function () {
-    $this->getItems();
-}]);
-
-$test = fn () => dd($this->items);
-
-booted(fn () => $getItems);
-updated(['title' => fn () => $this->note->update(['title' => $this->title])]);
-updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
-updated(['newItem' => $newItem ]);
+booted(fn () => $getEntries);
+updated(['title' => fn () => $this->record->update(['title' => $this->title])]);
+updated(['info' => fn () => $this->record->update(['info' => $this->info])]);
+updated(['units' => fn () => $this->record->update(['units' => $this->units])]);
+updated(['measuring' => fn () => $this->record->update(['measuring' => $this->measuring])]);
+updated(['newEntry' => $newEntry ]);
 
 ?>
 
@@ -174,7 +143,7 @@ updated(['newItem' => $newItem ]);
             <button
                 wire:click="destroy"
                 class="h-6 w-6 border rounded-full border-red-500 hover:bg-red-500 dark:text-red-500 dark:hover:text-gray-900 transition"
-                title="delete note"
+                title="delete record"
             >X</button>
         </div>
         <div x-show="open"
@@ -190,17 +159,13 @@ updated(['newItem' => $newItem ]);
             <div class="text-center text-lg tracking-wider m-2">Sorting</div>
             <div class="flex justify-between items-center">
                 <button
-                    wire:click="sort('title')"
-                    class="py-1"
-                >alphabetical</button>
-                |<button
                     wire:click="sort('created_at')"
                     class="py-1"
                 >chronological</button>
                 |<button
-                    wire:click="sort('position')"
+                    wire:click="sort('amount')"
                     class="py-1"
-                >draggable</button>
+                >volumetric</button>
             </div>
             <div class="text-center text-lg tracking-wider m-2">Settings</div>
             <div class="flex flex-col justify-between">
@@ -208,14 +173,6 @@ updated(['newItem' => $newItem ]);
                     wire:click="toggleInputAt"
                     class="py-1 text-left"
                 >input at {{ $this->inputAt == 'top' ? 'bottom' : 'top' }}</button>
-                <button
-                    wire:click="toggleChecks"
-                    class="py-1 text-left"
-                >{{ $this->showChecks ? 'hide' : 'show'}} checks</button>
-                <button
-                    wire:click="toggleMoveChecked"
-                    class="py-1 text-left"
-                >move checked to bottom</button>
             </div>
         </div>
         <textarea
@@ -223,32 +180,45 @@ updated(['newItem' => $newItem ]);
             placeholder="details..."
             class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
         ></textarea>
+        <div class="flex justify-between items-center dark:text-gray-300 mt-3">
+            <x-text-input 
+                wire:model.change="units"
+                placeholder="units"
+                class="w-1/3 border-none focus:border text-center"
+            />
+            <div>of</div>
+            <x-text-input 
+                wire:model.change="measuring"
+                placeholder="measuring"
+                class="w-1/3 border-none focus:border text-center"
+            />
+        </div>
     </div>
     <div class="dark:text-gray-300 w-full py-2">
         <div>
             @if($this->inputAt == 'top')
             <x-text-input 
-                wire:model.blur="newItem"
-                placeholder="new item"
+                wire:model.blur="newEntry"
+                placeholder="new entry"
                 class="border-none focus:border"
             />
             @endif
         </div>
         <div wire:sortable="updateOrder">
-        @foreach($items as $item)
-            <livewire:notes.note-item
-                wire:key="item-{{ $item->id }}"
-                :$item
-                :showChecks="$this->showChecks"
-                drag="{{ $this->sortBy == 'position' }}"
+        @foreach($entries as $entry)
+            <livewire:records.record-entry
+                wire:key="entry-{{ $entry->id }}"
+                :$entry
+                units="{{ $this->units }}"
+                measuring="{{ $this->measuring }}"
             />
         @endforeach
         </div>
         <div>
             @if($this->inputAt == 'bottom')
             <x-text-input 
-                wire:model.blur="newItem"
-                placeholder="new item"
+                wire:model.blur="newEntry"
+                placeholder="new entry"
                 class="border-none focus:border"
             />
             @endif

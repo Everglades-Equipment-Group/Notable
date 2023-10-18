@@ -47,7 +47,11 @@ $check = function () {
         />
     </div>
     @if ($this->drag)
-    <button wire:sortable.handle>drag</button>
+    <button
+        wire:sortable.handle
+        class="h-5 w-5 flex items-center justify-center border rounded-full border-gray-600 dark:text-gray-600"
+        title="drag"
+    >=</button>
     @endif
     <button
         wire:click="destroy"

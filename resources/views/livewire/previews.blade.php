@@ -7,7 +7,7 @@ use App\Models\Event;
  
 state([
     'notes' => fn () => Note::with('user')->latest()->get(),
-    // 'records' => fn () => Record::with('user')->latest()->get(),
+    'records' => fn () => Record::with('user')->latest()->get(),
     // 'events' => fn () => Event::with('user')->latest()->get(),
 ]);
 
@@ -37,7 +37,7 @@ $test = function () {
 <div>
     <div class="flex flex-col p-12 h-screen">
         <livewire:preview type="note" :data="$notes"/>
-        <livewire:preview type="record" />
+        <livewire:preview type="record" :data="$records"/>
         <livewire:preview type="event" />
     </div>
     <button wire:click="test" class="dark:text-gray-300">test</button>
