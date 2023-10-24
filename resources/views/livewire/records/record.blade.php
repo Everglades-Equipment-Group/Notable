@@ -1,5 +1,8 @@
 <?php
 
+// datetime updateable, format selection?
+// show / hide time, date, entry details
+
 use function Livewire\Volt\{on, booted, updated, mount, layout, rules, state};
 use App\Models\Record;
 use App\Models\RecordEntry;
@@ -16,6 +19,9 @@ state([
     'inputAt' => '',
     'sortBy' => '',
     'sortDirection' => '',
+    'total' => '',
+    'showTotal' => true,
+    'showTimeframe' => true,
 ]);
 
 layout('layouts.app');
@@ -26,28 +32,30 @@ rules([
 ]);
 
 $getEntries = function () {
-    $this->entries = RecordEntry::where('record_id', $this->id)
+    $this->entries = $this->record->entries()
                     ->orderBy($this->sortBy, $this->sortDirection)
                     ->get();
+
+    $this->total = $this->entries->sum('amount');
 };
 
 mount(function () {
-
     if ($this->id == 0) {
 
-        auth()->user()->records()->create([
+        Record::create([
             'title' => 'New Record',
             'user_id' => auth()->user()->id
         ]);
 
-        $this->id = Record::with('user')->latest()->first()->id;
+        $this->id = Record::where('user_id', auth()->user()->id)->latest()->first()->id;
+        auth()->user()->records()->attach($this->id, ['resource_type' => 'record']);
 
         session()->flash('id', $this->id );
         return $this->redirect('record/'.$this->id, navigate: true);
         
     } else {
         
-        $this->record = Record::where('id', $this->id)->first();
+        $this->record = auth()->user()->records()->where('resource_id', $this->id)->first();
     }
         
     if ($this->record) {
@@ -65,15 +73,13 @@ mount(function () {
 });
 
 $destroy = function (Record $record) {
-    
     $this->record->delete();
 
     return $this->redirect('/dashboard', navigate: true);
 };
 
-$newEntry = function () {
-
-    $this->record->recordEntries()->create([
+$createNewEntry = function () {
+    $this->record->entries()->create([
         'amount' => $this->newEntry
     ]);
 
@@ -100,7 +106,6 @@ $sort = function ($sortBy) {
 };
 
 $toggleInputAt = function () {
-
     $this->inputAt == 'top' ?
         $this->inputAt = 'bottom' :
         $this->inputAt = 'top';
@@ -110,16 +115,24 @@ $toggleInputAt = function () {
     $this->getEntries();
 };
 
+$toggleTotal = function () {
+    $this->showTotal = ! $this->showTotal;
+};
+
+$toggleTimeframe = function () {
+    $this->showTimeframe = ! $this->showTimeframe;
+};
+
 on(['delete-entry' => function () {
     $this->getEntries();
 }]);
 
-booted(fn () => $getEntries);
+// booted(fn () => $getEntries);
 updated(['title' => fn () => $this->record->update(['title' => $this->title])]);
 updated(['info' => fn () => $this->record->update(['info' => $this->info])]);
 updated(['units' => fn () => $this->record->update(['units' => $this->units])]);
 updated(['measuring' => fn () => $this->record->update(['measuring' => $this->measuring])]);
-updated(['newEntry' => $newEntry ]);
+// updated(['newEntry' => $newEntry ]);
 
 ?>
 
@@ -173,6 +186,14 @@ updated(['newEntry' => $newEntry ]);
                     wire:click="toggleInputAt"
                     class="py-1 text-left"
                 >input at {{ $this->inputAt == 'top' ? 'bottom' : 'top' }}</button>
+                <button
+                    wire:click="toggleTotal"
+                    class="py-1 text-left"
+                >{{ $this->showTotal ? 'hide' : 'show' }} total</button>
+                <button
+                    wire:click="toggleTimeframe"
+                    class="py-1 text-left"
+                >{{ $this->showTimeframe ? 'hide' : 'show' }} timeframe</button>
             </div>
         </div>
         <textarea
@@ -181,6 +202,9 @@ updated(['newEntry' => $newEntry ]);
             class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
         ></textarea>
         <div class="flex justify-between items-center dark:text-gray-300 mt-3">
+            @if($this->showTotal)
+            <div class="px-3">{{ $this->total }}</div>
+            @endif
             <x-text-input 
                 wire:model.change="units"
                 placeholder="units"
@@ -199,6 +223,8 @@ updated(['newEntry' => $newEntry ]);
             @if($this->inputAt == 'top')
             <x-text-input 
                 wire:model.blur="newEntry"
+                wire:blur="createNewEntry"
+                wire:keydown.enter="createNewEntry"
                 placeholder="new entry"
                 class="border-none focus:border"
             />
@@ -218,6 +244,8 @@ updated(['newEntry' => $newEntry ]);
             @if($this->inputAt == 'bottom')
             <x-text-input 
                 wire:model.blur="newEntry"
+                wire:blur="createNewEntry"
+                wire:keydown.enter="createNewEntry"
                 placeholder="new entry"
                 class="border-none focus:border"
             />

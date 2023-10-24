@@ -1,8 +1,10 @@
 <?php
 
+// indicate shared
+
 use function Livewire\Volt\{state};
 
-state(['data'])->reactive();
+state(['data']);
 state([
     'type' => '',
     'id' => 0,
@@ -57,16 +59,27 @@ $sort = function ($sortBy) {
         </div>
 
     </div>
-    <div class="flex flex-col justify-start items-center overflow-y-scroll py-2 border border-gray-500 rounded-lg h-4/5 w-full">
+    <div class="flex flex-col justify-start items-center overflow-y-scroll py-2 border border-gray-500 rounded-lg h-4/5 w-full p-4">
         @if ($data)
         @foreach ($data as $item)
+        <div class="relative w-full">
             <button
                 wire:click="viewItem({{ $item->id }})"
                 :key="{{ $item->id }}"
-                class="my-1"
+                class="w-full text-left my-1"
             >
                 {{ $item->title }}
             </button>
+            @if($item->users->count() > 1)
+            <span class="absolute right-0 text-center h-full pt-1 text-red-500">
+                @if($item->user_id == auth()->user()->id)
+                    &<i class="fa-solid fa-angle-right text-blue-400"></i>
+                @else
+                    <i class="fa-solid fa-angle-left text-blue-400"></i>&
+                @endif
+            </span>
+            @endif
+        </div>
         @endforeach
         @endif
         @if(!$data)

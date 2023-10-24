@@ -12,6 +12,7 @@ class NoteItem extends Model
 
     protected $fillable = [
         'title',
+        'info',
         'checked',
         'position'
     ];

@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -44,14 +45,17 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function notes(): HasMany
+    public function notes(): BelongsToMany
     {
-        return $this->hasMany(Note::class);
+        return $this->belongsToMany(Note::class, 'shared_resources', 'user_id', 'resource_id')
+                    ->withPivot('access', 'resource_type', 'user_id', 'resource_id')
+                    ->withTimestamps()
+                    ->wherePivot('resource_type', 'note');
     }
 
-    public function records(): HasMany
+    public function records(): BelongsToMany
     {
-        return $this->hasMany(Record::class);
+        return $this->belongsToMany(Record::class, 'shared_resources', 'user_id', 'resource_id')
+                    ->as('resource')->withTimestamps()->wherePivot('resource_type', 'record');
     }
-
 }

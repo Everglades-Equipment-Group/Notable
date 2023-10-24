@@ -5,13 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Record extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'title',
         'info',
         'units',
@@ -21,12 +22,13 @@ class Record extends Model
         'input_at',
     ];
 
-    public function user(): BelongsTo
+    public function users(): BelongsToMany
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class, 'shared_resources', 'resource_id', 'user_id')
+                    ->as('resource')->withTimestamps()->wherePivot('resource_type', 'record');
     }
 
-    public function recordEntries(): HasMany
+    public function entries(): HasMany
     {
         return $this->hasMany(RecordEntry::class);
     }

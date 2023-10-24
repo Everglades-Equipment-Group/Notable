@@ -1,6 +1,9 @@
 <?php
 
-use function Livewire\Volt\{mount, state};
+// datetime updating
+// display entry details
+
+use function Livewire\Volt\{updated, mount, state};
 use App\Models\RecordEntry;
 
 state([
@@ -25,6 +28,10 @@ $destroy = function () {
     $this->entry->delete();
     $this->dispatch('delete-entry');
 };
+
+updated(['amount' => fn () => $this->entry->update(['amount' => $this->amount])]);
+updated(['info' => fn () => $this->entry->update(['info' => $this->info])]);
+updated(['when' => fn () => $this->entry->update(['created_at' => $this->when])]);
 
 ?>
 
