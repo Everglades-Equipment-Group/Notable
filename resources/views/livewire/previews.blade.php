@@ -1,17 +1,24 @@
 <?php
 
+// save sorting preference
 // sort by shared (owned?)
+// notifcations
 
-use function Livewire\Volt\{on, state};
+use function Livewire\Volt\{booted, mount, on, state};
 use App\Models\Note;
 use App\Models\Record;
 use App\Models\Event;
  
 state([
-    'notes' => fn () => auth()->user()->notes()->latest()->get(),
-    'records' => fn () => auth()->user()->records()->latest()->get(),
+    'notes' => '',
+    'records' => '',
     // 'events' => fn () => Event::with('user')->latest()->get(),
 ]);
+
+booted(function () {
+    $this->notes = auth()->user()->notes()->latest()->get();
+    $this->records = auth()->user()->records()->latest()->get();
+});
 
 $nullIfEmpty = function ($data) {
     return $data->isEmpty() ? null : $data;

@@ -14,7 +14,8 @@ class NoteItem extends Model
         'title',
         'info',
         'checked',
-        'position'
+        'position',
+        'user_id',
     ];
 
     public function note(): BelongsTo

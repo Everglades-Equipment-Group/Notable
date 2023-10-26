@@ -1,7 +1,5 @@
 <?php
 
-// indicate shared
-
 use function Livewire\Volt\{state};
 
 state(['data']);
@@ -13,12 +11,12 @@ state([
 
 $newItem = function () {
     session()->flash('id', $this->id );
-    return $this->redirect($this->type.'/'.$this->id, navigate: true);
+    return $this->redirect($this->type.'/'.$this->id);
 };
 
 $viewItem = function ($id) {
     session()->flash('id', $id );
-    return $this->redirect($this->type.'/'.$id, navigate: true);
+    return $this->redirect($this->type.'/'.$id);
 };
 
 $sort = function ($sortBy) {

@@ -44,8 +44,8 @@ Volt::route('/record/{id}', 'records/record' ,function (Request $request, string
 //     ->middleware(['auth', 'verified'])
 //     ->name('note');
 
-Route::get('/records', [RecordController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('records');
+// Route::get('/records', [RecordController::class, 'index'])
+//     ->middleware(['auth', 'verified'])
+//     ->name('records');
 
 require __DIR__.'/auth.php';

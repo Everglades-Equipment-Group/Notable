@@ -1,11 +1,12 @@
 <?php
 
-// sharing permissions, can sort | check | add | edit | delete | share
-// move settings to settings table
-// clear items
+// sort items by creator (if note->users() > 1)
+// sharing input error handling
+// share copy / fork
+// walkthrough / legend
 // swipe events
+// fix bug can drag when can't sort
 // fix bug when dragging item to end of list
-// walkthrough
 
 use function Livewire\Volt\{on, booted, updated, mount, layout, rules, state};
 use App\Models\Note;
@@ -13,6 +14,8 @@ use App\Models\NoteItem;
 use App\Models\User;
 
 state([
+    'user' => auth()->user(),
+    'pivot' => '',
     'id' => session('id'),
     'note' => '',
     'items' => '',
@@ -28,7 +31,12 @@ state([
     'sortDirection' => '',
     'shareWith' => '',
     'isOwner' => '',
-    'access' => '',
+    'can_sort' => '',
+    'can_check' => '',
+    'can_add' => true,
+    'can_edit' => '',
+    'can_delete' => '',
+    'can_share' => '',
 ]);
 
 // tells volt which layout to use
@@ -41,10 +49,12 @@ rules([
 ]);
 
 $getItems = function () {
-    $this->items = $this->note->items()
-                    ->when($this->moveChecked, fn ($query) => $query->orderBy('checked'))
-                    ->orderBy($this->sortBy, $this->sortDirection)
-                    ->get();
+    if($this->note) {
+        $this->items = $this->note->items()
+                        ->when($this->moveChecked, fn ($query) => $query->orderBy('checked'))
+                        ->orderBy($this->sortBy, $this->sortDirection)
+                        ->get();
+    }
 };
 
 $getUsers = function () {
@@ -60,10 +70,15 @@ mount(function () {
         ]);
 
         $this->id = Note::where('user_id', auth()->user()->id)->latest()->first()->id;
-        auth()->user()->notes()->attach($this->id, ['resource_type' => 'note']);
+        auth()->user()->notes()->attach($this->id, [
+            'resource_type' => 'note',
+            'can_edit' => true,
+            'can_delete' => true,
+            'can_share' => true
+        ]);
 
         session()->flash('id', $this->id );
-        return $this->redirect('note/'.$this->id, navigate: true);
+        return $this->redirect('note/'.$this->id);
         
     } else {
         
@@ -72,16 +87,23 @@ mount(function () {
         
     if ($this->note) {
         $this->id = $this->note->id;
+        $this->isOwner = $this->note->user_id == auth()->user()->id;
+        $this->pivot = $this->user->notes()->where('resource_id', $this->id)->first()->pivot->toArray();
         $this->title = $this->note->title;
         $this->info = $this->note->info;
-        $this->inputAt = $this->note->input_at;
-        $this->showChecks = $this->note->show_checks;
-        $this->moveChecked = $this->note->move_checked;
-        $this->sortBy = $this->note->sort_by;
-        $this->sortDirection = $this->note->sort_direction;
-        $this->showItemInfo = $this->note->show_item_info;
-        $this->isOwner = $this->note->user_id == auth()->user()->id;
-        $this->access = $this->note->pivot->access;
+        $this->inputAt = $this->pivot['input_at'];
+        $this->showChecks = $this->pivot['show_checks'];
+        $this->moveChecked = $this->pivot['move_checked'];
+        $this->sortBy = $this->pivot['sort_by'];
+        $this->sortDirection = $this->pivot['sort_direction'];
+        $this->showItemInfo = $this->pivot['show_item_info'];
+        $this->can_sort = $this->pivot['can_sort'];
+        $this->can_check = $this->pivot['can_check'];
+        $this->can_add = $this->pivot['can_add'];
+        $this->can_edit = $this->pivot['can_edit'];
+        $this->can_delete = $this->pivot['can_delete'];
+        $this->can_share = $this->pivot['can_share'];
+        $this->showDeletes = $this->pivot['show_deletes'];
     }
 
     $this->getItems();
@@ -90,7 +112,8 @@ mount(function () {
 $createNewItem = function () {
     if ($this->newItem) {
         $this->note->items()->create([
-            'title' => $this->newItem
+            'title' => $this->newItem,
+            'user_id' => auth()->user()->id,
         ]);
 
         $this->newItem = '';
@@ -99,13 +122,13 @@ $createNewItem = function () {
     };
 };
 
-$destroy = function (Note $note) {
+$destroy = function () {
     
     // $this->authorize('delete', $note);
 
     $this->note->delete();
 
-    return $this->redirect('/dashboard', navigate: true);
+    return $this->redirect('/dashboard');
 };
 
 $sort = function ($sortBy) {
@@ -118,9 +141,9 @@ $sort = function ($sortBy) {
     }
 
     $this->sortBy = $sortBy;
-    $this->note->update([
-        'sort_by' => $this->sortBy, 
-        'sort_direction' => $this->sortDirection
+    $this->note->users()->updateExistingPivot($this->user->id, [
+        'sort_by' => $this->sortBy,
+        'sort_direction' => $this->sortDirection,
     ]);
     $this->getItems();
 };
@@ -138,31 +161,31 @@ $toggleInputAt = function () {
         $this->inputAt = 'bottom' :
         $this->inputAt = 'top';
 
-    $this->note->update(['input_at' => $this->inputAt]);
-
+    $this->note->users()->updateExistingPivot($this->user->id, ['input_at' => $this->inputAt]);
     $this->getItems();
 };
 
 $toggleDeletes = function () {
     $this->showDeletes = ! $this->showDeletes;
+    $this->note->users()->updateExistingPivot($this->user->id, ['show_deletes' => $this->showDeletes]);
     $this->getItems();
 };
 
 $toggleChecks = function () {
     $this->showChecks = ! $this->showChecks;
-    $this->note->update(['show_checks' => $this->showChecks]);
+    $this->note->users()->updateExistingPivot($this->user->id, ['show_checks' => $this->showChecks]);
     $this->getItems();
 };
 
 $toggleMoveChecked = function () {
     $this->moveChecked = ! $this->moveChecked;
-    $this->note->update(['move_checked' => $this->moveChecked]);
+    $this->note->users()->updateExistingPivot($this->user->id, ['move_checked' => $this->moveChecked]);
     $this->getItems();
 };
 
 $toggleItemInfo = function () {
     $this->showItemInfo = ! $this->showItemInfo;
-    $this->note->update(['show_item_info' => $this->showItemInfo]);
+    $this->note->users()->updateExistingPivot($this->user->id, ['show_item_info' => $this->showItemInfo]);
     $this->getItems();
 };
 
@@ -178,26 +201,22 @@ $unshare = function ($userId) {
 
 $leaveNote = function () {
     $this->note->users()->detach(auth()->user()->id);
-    return $this->redirect('/dashboard', navigate: true);
+    return $this->redirect('/dashboard');
 };
 
-$toggleAccess = function ($user, $access) {
-    $newAccess = $access == 'write' ? 'read' : 'write';
-
-    $this->note->users()->updateExistingPivot($user, ['access' => $newAccess]);
+$toggleAccess = function ($user, $access, $value) {
+    $this->note->users()->updateExistingPivot($user, [$access => ! $value]);
 };
 
-on(['delete-item' => function () {
-    $this->getItems();
-}]);
+on([
+    'delete-note' => $destroy,
+    'leave-note' => $leaveNote,
+    'delete-item' => $getItems,
+    'check' => $getItems,
+]);
 
-on(['check' => function () {
-    $this->getItems();
-}]);
+$test = fn () => dd($this->id);
 
-$test = fn () => dd($this->access);
-
-// booted(fn () => $getItems());
 updated(['title' => fn () => $this->note->update(['title' => $this->title])]);
 updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
 // updated(['newItem' => $createNewItem ]);
@@ -205,7 +224,7 @@ updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
 ?>
 
 <div class="flex flex-col items-center px-3">
-    <div x-data="{ open: true }"
+    <div x-data="{ open: false }"
         @click.outside="open = false"
         @close.stop="open = false"
         class="sticky top-16 w-full py-4 dark:bg-gray-900"
@@ -220,14 +239,22 @@ updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
                 wire:model.change="title"
                 placeholder="Title"
                 class="text-2xl border-none text-center focus:border"
-                disabled="{{ $this->access == 'read' }}"
+                disabled="{{ ! $this->can_edit }}"
             />
             @if($this->showDeletes)
+            @if($this->isOwner)
             <button
-                wire:click="{{ $this->isOwner ? 'destroy' : 'leaveNote' }}"
-                class="fa-regular fa-trash-can text-2xl hover:bg-red-500 dark:text-red-500 dark:hover:text-gray-900 transition"
+                wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, type: 'note' }})"
+                class="fa-regular fa-trash-can text-2xl text-red-500"
                 title="delete note"
             ></button>
+            @else
+            <button
+                wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, verb: 'leave', type: 'note' }})"
+                class="fa-solid fa-user-xmark text-2xl text-red-500"
+                title="leave note"
+            ></button>
+            @endif
             @else
             <div class="h-6 w-6"></div>
             @endif
@@ -242,6 +269,7 @@ updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
             class="flex flex-col items-center p-2 pb-5 dark:bg-gray-900 dark:text-gray-300"
             style="display: none;"
         >
+            @if($this->can_sort)
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 dark:bg-gray-900">Sorting</div>
             <div class="w-full flex justify-between items-center">
@@ -250,7 +278,7 @@ updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
                     class="py-1"
                 >alphabetical
                     @if($this->sortBy == 'title')
-                    <span class="{{ $this->sortDirection == 'asc' ? 'fa-arrow-down-long' : 'fa-arrow-up-long' }} fa-solid pl-1 text-blue-400">
+                    <span class="fa-arrow-{{ $this->sortDirection == 'asc' ? 'down' : 'up' }}-long fa-solid pl-1 text-blue-400">
                     </span>
                     @endif
                 </button>
@@ -260,7 +288,7 @@ updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
                     class="py-1"
                 >chronological
                     @if($this->sortBy == 'created_at')
-                    <span class="{{ $this->sortDirection == 'asc' ? 'fa-arrow-down-long' : 'fa-arrow-up-long' }} fa-solid pl-1 text-blue-400"> 
+                    <span class="fa-arrow-{{ $this->sortDirection == 'asc' ? 'down' : 'up' }}-long fa-solid pl-1 text-blue-400"> 
                     </span>
                     @endif
                 </button>
@@ -270,11 +298,12 @@ updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
                     class="py-1"
                 >draggable
                     @if($this->sortBy == 'position')
-                        <span class="{{ $this->sortDirection == 'asc' ? 'fa-arrow-up-long' : 'fa-arrow-down-long' }} fa-solid pl-1 text-blue-400">
+                        <span class="fa-arrow-{{ $this->sortDirection == 'asc' ? 'down' : 'up' }}-long fa-solid pl-1 text-blue-400">
                         </span>
                     @endif
                 </button>
             </div>
+            @endif
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 dark:bg-gray-900">Settings</div>
             <div class="w-full flex flex-col justify-between">
@@ -298,11 +327,17 @@ updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
                     wire:click="toggleDeletes"
                     class="py-1 text-left text-red-500"
                 >{{ $this->showDeletes ? 'hide' : 'show'}} delete buttons</button>
+                @if($this->can_delete)
+                <button
+                    wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, type: 'note-items' } })"
+                    class="py-1 text-left text-red-500"
+                >clear all items</button>
+                @endif
             </div>
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 dark:bg-gray-900">Sharing</div>
             <div class="w-full flex flex-col justify-between">
-                @if($this->isOwner)
+                @if($this->can_share)
                 <div>
                     <button
                         wire:click="share"
@@ -319,38 +354,45 @@ updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
                 <div class="text-lg text-center tracking-wider">
                     With:
                 </div>
-                <div class="py-2">
+                <div class="py-3">
                     @foreach($this->note->users as $user)
                         @if($user->id != auth()->user()->id)
-                        <div x-data="{ openAccessPannel: true }"
+                        <div x-data="{ openAccessPannel: false }"
                             @close.stop="openAccessPannel = false"
+                            @click.outside="openAccessPannel = false"
+                            wire:key="user-{{ $user->id }}"
+                            class="py-1"
                         >
                             <div class="flex justify-between items-center">
                                 <div>{{ $user->name }}</div>
+                                @if($user->id == $this->note->user_id)
+                                <div>owner</div>
+                                @endif
                                 @if($this->isOwner)
                                 <div class="flex">
-                                <!-- <button
-                                    wire:click="toggleAccess({{ $user->id }}, '{{$user->pivot->access}}')"
-                                    class=""
-                                    title="change access"
-                                >can {{ $user->pivot->access }}</button> -->
                                     <button
                                         @click="openAccessPannel = ! openAccessPannel"
                                         class="flex justify-between items-center border border-gray-700 rounded-full pl-1"
                                         title="access panel"
                                     >
-                                        <span class="fa-solid fa-shuffle text-sm text-gray-400 p-1"></span>
-                                        <span class="fa-solid fa-check text-sm text-green-700 p-1"></span>
-                                        <span class="fa-solid fa-plus text-sm text-blue-500 p-1"></span>
-                                        <span class="fa-solid fa-scissors text-sm text-yellow-600 p-1"></span>
-                                        <span class="fa-solid fa-trash text-sm text-red-600 p-1"></span>
-                                        <span class="fa-solid fa-user-plus text-sm text-blue-500 p-1"></span>
-                                        <span class="fa-solid fa-key text-blue-400 p-1 ml-1 border border-gray-700 rounded-full"></span>
+                                        @if($user->pivot->can_sort)
+                                        <span class="fa-solid fa-shuffle text-sm text-gray-400 p-1" title="can sort"></span>@endif
+                                        @if($user->pivot->can_check)
+                                        <span class="fa-solid fa-check text-sm text-green-700 p-1" title="can check"></span>@endif
+                                        @if($user->pivot->can_add)
+                                        <span class="fa-solid fa-plus text-sm text-blue-500 p-1" title="can add"></span>@endif
+                                        @if($user->pivot->can_edit)
+                                        <span class="fa-solid fa-scissors text-sm text-yellow-600 p-1" title="can edit"></span>@endif
+                                        @if($user->pivot->can_delete)
+                                        <span class="fa-solid fa-trash text-sm text-red-600 p-1" title="can delete"></span>@endif
+                                        @if($user->pivot->can_share)
+                                        <span class="fa-solid fa-user-plus text-sm text-blue-500 p-1" title="can share"></span>@endif
+                                        <span class="fa-solid fa-key text-blue-400 p-1 ml-1 border border-gray-700 rounded-full" title="access pannel"></span>
                                     </button>
                                     @if($this->showDeletes)
                                     <button
                                         wire:click="unshare({{ $user->id }})"
-                                        class="fa-regular fa-trash-can ml-5 hover:bg-red-500 dark:text-red-500 dark:hover:text-gray-900 transition"
+                                        class="fa-regular fa-trash-can ml-6 hover:bg-red-500 dark:text-red-500 dark:hover:text-gray-900 transition"
                                         title="unshare"
                                     ></button>
                                     @endif
@@ -364,16 +406,34 @@ updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
                                 x-transition:leave="transition ease-in duration-75"
                                 x-transition:leave-start="opacity-100 scale-100"
                                 x-transition:leave-end="opacity-0 scale-95"
-                                class="flex flex-col items-center py-2"
+                                class="flex flex-col items-center py-3"
                                 style="display: none;"
                             >
-                                <div>Can:</div>
-                                <div>
-
+                                <div class="text-lg text-center tracking-wider">Can:</div>
+                                <div class="py-2">
+                                @foreach($user->pivot->toArray() as $key => $value)
+                                    @if(str_starts_with($key, 'can_') && $value)
+                                        <button
+                                            wire:click="toggleAccess({{ $user->id }}, '{{ $key }}', {{ $value }})"
+                                            wire:key="access-{{ $key }}"
+                                            class="border border-gray-700 rounded-lg px-2 py-1 m-1"
+                                            title="toggle {{ $key }}"
+                                        >{{ str_replace('can_', '', $key) }}</button>
+                                    @endif
+                                @endforeach
                                 </div>
-                                <div>Can not:</div>
-                                <div>
-
+                                <div class="text-lg text-center tracking-wider">Can not:</div>
+                                <div class="py-2">
+                                @foreach($user->pivot->toArray() as $key => $value)
+                                    @if(str_starts_with($key, 'can_') && !$value)
+                                        <button
+                                            wire:click="toggleAccess({{ $user->id }}, '{{ $key }}', {{ $value }})"
+                                            wire:key="access-{{ $key }}"
+                                            class="border border-gray-700 rounded-lg px-2 py-1 m-1"
+                                            title="toggle {{ $key }}"
+                                        >{{ str_replace('can_', '', $key) }}</button>
+                                    @endif
+                                @endforeach
                                 </div>
                             </div>
                         </div>
@@ -382,7 +442,7 @@ updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
                 </div>
                 @if(!$this->isOwner)
                     <button
-                        wire:click="leaveNote"
+                        wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, verb: 'leave', type: 'note' }})"
                         class="text-red-500 w-fit my-2"
                     >leave note</button>
                 @endif
@@ -392,12 +452,12 @@ updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
             wire:model.change="info"
             placeholder="details..."
             class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
-            {{ $this->access == 'read' ? 'readonly' : ''}}
+            {{ $this->can_edit ? '' : 'readonly' }}
         ></textarea>
     </div>
     <div class="dark:text-gray-300 w-full p-2">
         <div>
-            @if($this->inputAt == 'top' && $this->access == 'write')
+            @if($this->inputAt == 'top' && $this->can_add)
             <x-text-input 
                 wire:model.blur="newItem"
                 wire:blur="createNewItem"
@@ -416,12 +476,14 @@ updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
                 :showAllInfo="$this->showItemInfo"
                 :showDeletes="$this->showDeletes"
                 drag="{{ $this->sortBy == 'position' }}"
-                :access="$this->access"
+                :can_check="$this->can_check"
+                :can_edit="$this->can_edit"
+                :can_delete="$this->can_delete"
             />
         @endforeach
         </div>
         <div>
-            @if($this->inputAt == 'bottom' && $this->access == 'write')
+            @if($this->inputAt == 'bottom' && $this->can_add)
             <x-text-input 
                 wire:model.blur="newItem"
                 wire:blur="createNewItem"
