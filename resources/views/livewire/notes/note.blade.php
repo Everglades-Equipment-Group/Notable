@@ -213,6 +213,7 @@ on([
     'leave-note' => $leaveNote,
     'delete-item' => $getItems,
     'check' => $getItems,
+    'resize' => $getItems,
 ]);
 
 $test = fn () => dd($this->id);
