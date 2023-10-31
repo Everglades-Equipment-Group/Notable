@@ -31,6 +31,7 @@ state([
     'sortDirection' => '',
     'shareWith' => '',
     'isOwner' => '',
+    'isShared' => '',
     'can_sort' => '',
     'can_check' => '',
     'can_add' => true,
@@ -88,6 +89,7 @@ mount(function () {
     if ($this->note) {
         $this->id = $this->note->id;
         $this->isOwner = $this->note->user_id == auth()->user()->id;
+        $this->isShared = $this->note->users()->count() > 1;
         $this->pivot = $this->user->notes()->where('resource_id', $this->id)->first()->pivot->toArray();
         $this->title = $this->note->title;
         $this->info = $this->note->info;
@@ -109,6 +111,27 @@ mount(function () {
     $this->getItems();
 });
 
+$notify = function ($event) {
+    if ($this->isShared) {
+        // $this->note->users()->where('user_id', '!=', auth()->user()->id)->get()->each(function ($user, $event) {
+        //     $user->notifications()->create([
+        //         'from_id' => auth()->user()->id,
+        //         'event' => $event,
+        //         'resource_type' => 'note',
+        //         'resource_id' => $this->note->id,
+        //     ]);
+        // });
+        foreach($this->note->users()->where('user_id', '!=', auth()->user()->id)->get() as $user) {
+            $user->notifications()->create([
+                'from_id' => auth()->user()->id,
+                'event' => $event,
+                'resource_type' => 'note',
+                'resource_id' => $this->note->id,
+            ]);
+        };
+    };
+};
+
 $createNewItem = function () {
     if ($this->newItem) {
         $this->note->items()->create([
@@ -119,12 +142,16 @@ $createNewItem = function () {
         $this->newItem = '';
 
         $this->getItems();
+
+        $this->notify('added item to note');
     };
 };
 
 $destroy = function () {
     
     // $this->authorize('delete', $note);
+
+    $this->notify('deleted note');
 
     $this->note->delete();
 
@@ -192,15 +219,22 @@ $toggleItemInfo = function () {
 $share = function () {
     $this->note->users()->attach(User::where('name', $this->shareWith)->first()->id, ['resource_type' => 'note']);
     
+    $this->notify('added '. $this->shareWith .' to note');
+
     $this->shareWith = '';
 };
 
 $unshare = function ($userId) {
+    $this->notify('removed '. User::find($userId)->name .' from note');
+
     $this->note->users()->detach($userId);
 };
 
 $leaveNote = function () {
     $this->note->users()->detach(auth()->user()->id);
+
+    $this->notify('left note');
+
     return $this->redirect('/dashboard');
 };
 
@@ -218,8 +252,16 @@ on([
 
 $test = fn () => dd($this->id);
 
-updated(['title' => fn () => $this->note->update(['title' => $this->title])]);
-updated(['info' => fn () => $this->note->update(['info' => $this->info])]);
+updated([
+    'title' => function () {
+        $this->notify('renamed note: '. $this->note->title .' to');
+        $this->note->update(['title' => $this->title]);
+    },
+    'info' => function () {
+        $this->notify('updated info in note');
+        $this->note->update(['info' => $this->info]);
+    },
+]);
 // updated(['newItem' => $createNewItem ]);
 
 ?>
