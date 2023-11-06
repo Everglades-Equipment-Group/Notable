@@ -12,12 +12,13 @@ use App\Models\Event;
 state([
     'notes' => '',
     'records' => '',
-    // 'events' => fn () => Event::with('user')->latest()->get(),
+    'events' => '',
 ]);
 
 booted(function () {
     $this->notes = auth()->user()->notes()->latest()->get();
     $this->records = auth()->user()->records()->latest()->get();
+    $this->events = auth()->user()->events()->latest()->get();
 });
 
 $nullIfEmpty = function ($data) {
@@ -51,7 +52,7 @@ $test = function () {
     <div class="flex flex-col p-12 h-screen">
         <livewire:preview type="note" :data="$this->nullIfEmpty($notes)"/>
         <livewire:preview type="record" :data="$this->nullIfEmpty($records)"/>
-        <livewire:preview type="event" />
+        <livewire:preview type="event" :data="$this->nullIfEmpty($events)"/>
     </div>
     <button wire:click="test" class="dark:text-gray-300">test</button>
 </div>

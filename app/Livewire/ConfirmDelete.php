@@ -6,14 +6,15 @@ use LivewireUI\Modal\ModalComponent;
 
 class ConfirmDelete extends ModalComponent
 {
-    public $id;
+    public $id = '';
     public $type;
     public $verb = 'delete';
+    public $message = '';
 
-    public function mount($type, $id)
+    public function mount($type, $message)
     {
-        $this->id = $id;
         $this->type = $type;
+        $this->message = $message;
     }
 
     public function delete()

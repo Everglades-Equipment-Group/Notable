@@ -4,6 +4,13 @@ use Livewire\Volt\Component;
 
 new class extends Component
 {
+    public $hasNewNotifications = false;
+
+    public function boot(): void
+    {
+        $this->hasNewNotifications = auth()->user()->notifications()->where('read', false)->exists();
+    }
+
     public function logout(): void
     {
         auth()->guard('web')->logout();
@@ -13,10 +20,22 @@ new class extends Component
 
         $this->redirect('/', navigate: true);
     }
+
+    public function test(): void
+    {
+        auth()->user()->notifications()->create([
+            'from_id' => auth()->user()->id,
+            'event' => 'is testing',
+            'resource_type' => 'note',
+            'resource_id' => 112,
+        ]);
+        // dd($this->hasNewNotifications);
+    }
 }; ?>
 
 <nav x-data="{ open: false }" class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 z-20">
     <!-- Primary Navigation Menu -->
+    <button wire:click="test" class="absolute left-20 bottom-5 text-gray-300">test</button>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
@@ -24,8 +43,8 @@ new class extends Component
                 <div class="flex items-center">
                     <a href="{{ route('dashboard') }}" wire:navigate>
                         <div class="flex items-center rotate-90 p-1">
-                            <span class="text-3xl text-red-500">&</span>
-                            <span class="fa-solid fa-chevron-right text-lg pb-1 text-blue-400 -ml-2"></span>
+                            <span class="text-3xl text-red-500"><img src="/favicon-32x32.png"  class="inline h-6 w-6" alt="&"/></span>
+                            <span class="fa-solid fa-chevron-right text-lg pt-1 text-blue-400 -ml-2"></span>
                         </div>
                         <!-- <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" /> -->
                     </a>
@@ -39,7 +58,7 @@ new class extends Component
                 </div>
             </div>
             <a href="{{ route('dashboard') }}" wire:navigate>
-                <div class="text-blue-400 text-2xl py-4 pl-2 tracking-wider">Nota<span class="text-red-500">&</span>le</div>
+                <div class="text-blue-400 text-2xl py-4 pl-2 tracking-wider">Nota<span class="inline text-red-500"><img src="/favicon-16x16.png"  class="inline pb-px mb-px" alt="&"/></span>le</div>
             </a>
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ml-6">
@@ -73,11 +92,14 @@ new class extends Component
 
             <!-- Hamburger -->
             <div class="-mr-1 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
+                <button @click="open = ! open" class="relative inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
+                    @if($this->hasNewNotifications)
+                    <div class="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-500"></div>
+                    @endif
                 </button>
             </div>
         </div>
@@ -89,6 +111,15 @@ new class extends Component
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            <div class="relative flex items-center">
+                <x-responsive-nav-link href="/notifications" :active="request()->routeIs('notifications')" wire:navigate class="border-x border-red-500">
+                    {{ __('Notifications') }}
+                </x-responsive-nav-link>
+                @if($this->hasNewNotifications)
+                <div class="absolute left-0 h-full w-1 bg-red-500"></div>
+                @endif
+            </div>
+            
         </div>
 
         <!-- Responsive Settings Options -->

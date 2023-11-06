@@ -3,25 +3,35 @@
 // datetime updating
 // display entry details
 
-use function Livewire\Volt\{updated, mount, state};
+use function Livewire\Volt\{on, updated, mount, state};
 use App\Models\RecordEntry;
 
 state([
     'entry' => '',
     'amount' => '',
     'info' => '',
-    'when' => ''
+    'when' => '',
+    'time' => '',
+    'date' => '',
 ]);
 
 state([
     'units' => '',
     'measuring' => '',
+    'showDeletes' => '',
+    'showUnits' => '',
+    'showTime' => '',
+    'showDate' => '',
+    'can_edit' => '',
+    'can_delete' => '',
 ])->reactive();
 
 mount(function () {
     $this->amount = $this->entry->amount;
     $this->info = $this->entry->info;
-    $this->when = $this->entry->created_at->format('H:i d/m/y');
+    $this->when = $this->entry->created_at->format('Y-m-d\Th:m');
+    $this->time = $this->entry->created_at->format('h:m');
+    $this->date = $this->entry->created_at->format('Y-m-d');
 });
 
 $destroy = function () {
@@ -29,9 +39,13 @@ $destroy = function () {
     $this->dispatch('delete-entry');
 };
 
-updated(['amount' => fn () => $this->entry->update(['amount' => $this->amount])]);
-updated(['info' => fn () => $this->entry->update(['info' => $this->info])]);
-updated(['when' => fn () => $this->entry->update(['created_at' => $this->when])]);
+on(['delete-record-entries' => $destroy]);
+
+updated([
+    'amount' => fn () => $this->entry->update(['amount' => $this->amount]),
+    'info' => fn () => $this->entry->update(['info' => $this->info]),
+    'when' => fn () => $this->entry->update(['created_at' => $this->when])
+]);
 
 ?>
 
@@ -42,16 +56,31 @@ updated(['when' => fn () => $this->entry->update(['created_at' => $this->when])]
             placeholder="amount"
             class="w-1/6 text-center border-none focus:border"
         />
-        <div>{{ $this->units }} of {{ $this->measuring }} at</div>
+        @if($this->showUnits)
+        <div>{{ $this->units }} of {{ $this->measuring }}</div>
+        @endif
+        @if($this->showTime)
         <x-text-input 
-            wire:model.change="when"
-            placeholder="when"
-            class="w-2/5 border-none focus:border"
+            wire:model.change="time"
+            placeholder="time"
+            class="shrink border-none focus:border"
+            type="time"
         />
+        @endif
+        @if($this->showDate)
+        <x-text-input 
+            wire:model.change="date"
+            placeholder="date"
+            class="shrink border-none focus:border"
+            type="date"
+        />
+        @endif
     </div>
+    @if($this->can_delete && $this->showDeletes)
     <button
         wire:click="destroy"
-        class="h-5 w-5 text-sm border rounded-full border-red-500 hover:bg-red-500 dark:text-red-500 dark:hover:text-gray-900 transition"
+        class="fa-regular fa-trash-can ml-6 text-red-500"
         title="delete entry"
-    >X</button>
+    ></button>
+    @endif
 </div>

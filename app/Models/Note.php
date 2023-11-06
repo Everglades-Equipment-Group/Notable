@@ -15,12 +15,6 @@ class Note extends Model
         'user_id',
         'title',
         'info',
-        'input_at',
-        'show_checks',
-        'move_checked',
-        'sort_by',
-        'sort_direction',
-        'show_item_info'
     ];
 
     public function users(): BelongsToMany

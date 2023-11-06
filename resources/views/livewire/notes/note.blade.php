@@ -24,7 +24,7 @@ state([
     'newItem' => '',
     'inputAt' => '',
     'showItemInfo' => '',
-    'showDeletes' => true,
+    'showDeletes' => '',
     'showChecks' => '',
     'moveChecked' => '',
     'sortBy' => '',
@@ -34,7 +34,7 @@ state([
     'isShared' => '',
     'can_sort' => '',
     'can_check' => '',
-    'can_add' => true,
+    'can_add' => '',
     'can_edit' => '',
     'can_delete' => '',
     'can_share' => '',
@@ -81,9 +81,12 @@ mount(function () {
         session()->flash('id', $this->id );
         return $this->redirect('note/'.$this->id);
         
-    } else {
+    } elseif (Note::find($this->id) != null) {
         
         $this->note = auth()->user()->notes()->where('resource_id', $this->id)->first();
+    } else {
+
+        return $this->redirect('/dashboard');
     }
         
     if ($this->note) {
@@ -287,13 +290,13 @@ updated([
             @if($this->showDeletes)
             @if($this->isOwner)
             <button
-                wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, type: 'note' }})"
+                wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, type: 'note', message: 'Delete this note?' }})"
                 class="fa-regular fa-trash-can text-2xl text-red-500"
                 title="delete note"
             ></button>
             @else
             <button
-                wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, verb: 'leave', type: 'note' }})"
+                wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, verb: 'leave', type: 'note', message: 'Leave this note?' }})"
                 class="fa-solid fa-user-xmark text-2xl text-red-500"
                 title="leave note"
             ></button>
@@ -372,7 +375,7 @@ updated([
                 >{{ $this->showDeletes ? 'hide' : 'show'}} delete buttons</button>
                 @if($this->can_delete)
                 <button
-                    wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, type: 'note-items' } })"
+                    wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, type: 'note-items', message: 'Delete this note\'s items?' }})"
                     class="py-1 text-left text-red-500"
                 >clear all items</button>
                 @endif
@@ -485,7 +488,7 @@ updated([
                 </div>
                 @if(!$this->isOwner)
                     <button
-                        wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, verb: 'leave', type: 'note' }})"
+                        wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, verb: 'leave', type: 'note', message: 'Leave this note?' }})"
                         class="text-red-500 w-fit my-2"
                     >leave note</button>
                 @endif
@@ -506,11 +509,11 @@ updated([
                 wire:blur="createNewItem"
                 wire:keydown.enter="createNewItem"
                 placeholder="new item"
-                class="border-none focus:border"
+                class="w-full border-none focus:border"
             />
             @endif
         </div>
-        <div wire:sortable="updateOrder">
+        <div>
         @foreach($items as $item)
             <livewire:notes.note-item
                 wire:key="item-{{ $item->id }}"
@@ -532,7 +535,7 @@ updated([
                 wire:blur="createNewItem"
                 wire:keydown.enter="createNewItem"
                 placeholder="new item"
-                class="border-none focus:border"
+                class="w-full border-none focus:border"
             />
             @endif
         </div>
