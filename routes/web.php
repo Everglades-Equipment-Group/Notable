@@ -42,6 +42,8 @@ Volt::route('/event/{id}', 'events/event', function (Request $request, string $i
     return 'Event '.$id;
 });
 
+Volt::route('/events', 'events/events');
+
 // Route::view('note', 'livewire.notes.note')
 //     ->middleware(['auth'])
 //     ->name('note');

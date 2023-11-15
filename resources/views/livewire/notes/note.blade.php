@@ -305,6 +305,7 @@ updated([
             <div class="h-6 w-6"></div>
             @endif
         </div>
+<!-- SETTINGS ----------------------------------------------------->
         <div x-show="open"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"
@@ -494,6 +495,7 @@ updated([
                 @endif
             </div>
         </div>
+<!-- END SETTINGS -------------------------------------------------->
         <textarea
             wire:model.change="info"
             placeholder="details..."

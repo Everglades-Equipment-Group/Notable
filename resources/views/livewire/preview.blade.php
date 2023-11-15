@@ -24,14 +24,19 @@ $sort = function ($sortBy) {
         $this->sortBy = $sortBy.'-desc' :
         $this->sortBy = $sortBy;
     $this->dispatch('sort-'.$this->type.'s', type: $this->type, sortBy: $this->sortBy);
-}
+};
+
+$viewAll = function () {
+    // session()->flash('type', $type);
+    return $this->redirect($this->type.'s');
+};
 
 ?>
 
 <div class="flex flex-col items-center border border-gray-500 rounded-lg h-1/4 my-5 px-4 pb-4 dark:text-gray-300">
     <div class="flex items-center justify-between h-1/5 w-full dark:text-gray-300">
             <button wire:click="newItem" class="p-1 pr-5 border-r border-gray-500 rounded-lg">New</button>
-        <div class="p-1 tracking-wider">{{ ucfirst($type) }}s</div>
+        <div wire:click="viewAll" class="p-1 tracking-wider">{{ ucfirst($type) }}s</div>
 
         <div x-data="{ open: false }"
             @click.outside="open = false"
