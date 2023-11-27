@@ -19,7 +19,8 @@ class Event extends Model
         'start_time',
         'end_time',
         'all_day',
-        'recurring'
+        'recurring',
+        'frequency',
     ];
 
     public function users(): BelongsToMany

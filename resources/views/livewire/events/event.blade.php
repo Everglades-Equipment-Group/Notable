@@ -17,7 +17,7 @@ state([
     'endTime' => '',
     'allDay' => '',
     'recurring' => '',
-    'frequency' => 1,
+    'frequency' => '',
     // 'showDate' => '',
     // 'showTime' => '',
     'isOwner' => '',
@@ -63,8 +63,9 @@ mount(function () {
     $this->endDate = $this->event->end_date;
     $this->startTime = $this->event->start_time;
     $this->endTime = $this->event->end_time;
-    $this->allDay = $this->event->allDay;
+    $this->allDay = $this->event->all_day;
     $this->recurring = $this->event->recurring;
+    $this->frequency = $this->event->frequency;
     $this->can_edit = $this->event->pivot->can_edit;
     $this->can_delete = $this->event->pivot->can_delete;
     $this->can_share = $this->event->pivot->can_share;
@@ -84,6 +85,19 @@ $notify = function ($event) {
             ]);
         };
     };
+};
+
+$viewAll = function () {
+    return $this->redirect('/events');
+};
+
+$viewThisDay = function () {
+    session()->flash('viewDate', $this->startDate);
+    return $this->redirect('/events');
+};
+
+$newEvent = function () {
+    return $this->redirect('/event/0');
 };
 
 $destroy = function () {
@@ -121,16 +135,19 @@ $toggleAccess = function ($user, $access, $value) {
     $this->event->users()->updateExistingPivot($user, [$access => ! $value]);
 };
 
-$toggleRecurring = function ($frequency) {
-    if ($frequency) $this->notify('enabled '. $frequency .' recursion for event');
-    if (!$frequency) $this->notify('disabled '. $this->recurring .' recursion for event');
+$toggleRecurring = function ($every) {
+    if ($this->recurring == $every) $every = null;
+    if ($every) $this->notify('enabled '. $every .' recursion for event');
+    if (!$every) $this->notify('disabled '. $this->recurring .' recursion for event');
 
-    $this->recurring = $frequency;
+    $this->recurring = $every;
     $this->event->update(['recurring' => $this->recurring]);
 };
 
 $toggleAllDay = function () {
-    $this->event->update(['all_day' => ! $this->allDay]);
+    $this->allDay = ! $this->allDay;
+    // $this->notify('toggled all day event');
+    $this->event->update(['all_day' => $this->allDay]);
 };
 
 on([
@@ -163,16 +180,39 @@ updated([
         $this->notify('updated end time of event');
         $this->event->update(['end_time' => $this->endTime]);
     },
+    'frequency' => function () {
+        $this->notify('updated frequency of event');
+        $this->event->update(['frequency' => $this->frequency]);
+    },
 ]);
 
 ?>
-
 <div class="flex flex-col items-center px-3 dark:text-gray-300">
     <div x-data="{ open: false }"
         @click.outside="open = false"
         @close.stop="open = false"
         class="sticky top-16 w-full py-4 dark:bg-gray-900"
     >
+        <div class="flex items-center justify-between w-full py-5 px-20">
+            <button
+                wire:click="viewAll"
+                class="fa-regular fa-calendar-days text-2xl text-blue-400"
+                title="all events"
+            >
+            </button>
+            <button
+                wire:click="viewThisDay"
+                class="fa-solid fa-calendar-day text-2xl text-blue-400"
+                title="events this day"
+            >
+            </button>
+            <button
+                wire:click="newEvent"
+                class="fa-regular fa-calendar-plus text-2xl text-blue-400"
+                title="new event"
+            >
+            </button>
+        </div>
         <div class="flex justify-between items-center px-2 mb-3">
             <button
                 @click="open = ! open"
@@ -323,49 +363,70 @@ updated([
             {{ $this->can_edit ? '' : 'readonly' }}
         ></textarea>
     </div>
-    <div class="flex flex-col w-full">
-        <div class="flex items-center justify-between">
-            <div class="tracking-wide">Start:</div>
-            <x-text-input
-                wire:model.change="startDate"
-                type="date"
-                class="border-none focus:border"
-                disabled="{{ !$this->can_edit }}"
-            />
-            <x-text-input
-                wire:model.change="startTime"
-                type="time"
-                class="border-none focus:border"
-                disabled="{{ !$this->can_edit }}"
-            />
-            <!-- <div>all day</div> -->
+    <div x-data="{ openEvery: false }"
+        @click.outside="openEvery = false"
+        @close.stop="openEvery = false"
+        class="w-full"
+    >
+        <div class="flex w-full justify-evenly">
+            <div class="flex flex-col items-center justify-between">
+                <div class="tracking-wide text-xl pb-1">Start</div>
+                <x-date-input
+                    wire:model.change="startDate"
+                    disabled="{{ !$this->can_edit }}"
+                />
+                <x-time-input
+                    wire:model.change="startTime"
+                    disabled="{{ !$this->can_edit }}"
+                />
+                <x-text-button
+                    @click="openEvery = ! openEvery"
+                    class="{{ $this->recurring ? 'bg-blue-400 dark:bg-blue-400 text-gray-300 dark:text-gray-900' : '' }}"
+                >
+                    every
+                </x-text-button>
+            </div>
+            <div class="flex flex-col items-center justify-between">
+                <div class="tracking-wide text-xl pb-1">End</div>
+                <x-date-input
+                    wire:model.change="endDate"
+                    disabled="{{ !$this->can_edit }}"
+                />
+                <x-time-input
+                    wire:model.change="endTime"
+                    disabled="{{ !$this->can_edit }}"
+                />
+                <x-text-button
+                    wire:click="toggleAllDay"
+                    class="{{ $this->allDay ? 'bg-blue-400 dark:bg-blue-400 text-gray-300 dark:text-gray-900' : '' }}"
+                >
+                    all day
+                </x-text-button>
+            </div>
         </div>
-        <div class="flex items-center justify-between">
-            <div class="tracking-wide">End:</div>
+        <div x-show="openEvery"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="flex items-center rounded-lg my-3 border border-blue-400 overflow-hidden dark:bg-gray-900"
+            style="display: none;"
+        >
             <x-text-input
-                wire:model.change="endDate"
-                type="date"
-                class="border-none focus:border"
-                disabled="{{ !$this->can_edit }}"
+                wire:model.live="frequency"
+                class="w-12 border-none text-center text-blue-400"
             />
-            <x-text-input
-                wire:model.change="endTime"
-                type="time"
-                class="border-none focus:border"
-                disabled="{{ !$this->can_edit }}"
-            />
-        </div>
-        <div class="flex items-center rounded-lg border border-gray-700 overflow-hidden">
-            <div class="border border-gray-700 rounded-lg p-2">every</div>
-            <x-text-input
-                wire:model.change="frequency"
-                class="w-12 rounded-none border-none"
-            />
-            <button class="border border-gray-700 p-2">minute</button>
-            <button class="border border-gray-700 p-2">hour</button>
-            <button class="border border-gray-700 p-2">day</button>
-            <button class="border border-gray-700 p-2">week</button>
-            <button class="border border-gray-700 p-2">month</button>
+            @foreach(['minute', 'hour', 'day', 'week', 'month'] as $every)
+                <button
+                    wire:click="toggleRecurring('{{ $every }}')"
+                    wire:key="every-{{ $every }}"
+                    class="{{ $this->recurring == $every ? 'bg-blue-400 text-gray-300 dark:text-gray-900' : '' }} border-l border-blue-400 text-blue-400 py-2 px-3"
+                >
+                    {{ $every }}
+                </button>
+            @endforeach
         </div>
     </div>
 </div>

@@ -87,8 +87,7 @@ mount(function () {
         $this->info = $this->record->info;
         $this->units = $this->record->units;
         $this->measuring = $this->record->measuring;
-        $this->from = $this->record->entries()->oldest()->first()->created_at->format('Y-m-d\Th:m');
-        $this->to = $this->record->entries()->latest()->first()->created_at->format('Y-m-d\Th:m');
+        
         $this->inputAt = $this->pivot['input_at'];
         $this->sortBy = $this->pivot['sort_by'];
         $this->sortDirection = $this->pivot['sort_direction'];
@@ -104,7 +103,11 @@ mount(function () {
         $this->showDate = $this->pivot['show_date'];
         $this->showTotal = $this->pivot['show_total'];
         $this->showTimeframe = $this->pivot['show_timeframe'];
-    }
+        if ($this->record->entries()->first()) {
+            $this->from = $this->record->entries()->oldest()->first()->created_at->format('Y-m-d\Th:m');
+            $this->to = $this->record->entries()->latest()->first()->created_at->format('Y-m-d\Th:m');
+        };
+    };
 
     $this->getEntries();
 });

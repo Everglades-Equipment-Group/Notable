@@ -48,11 +48,8 @@ $test = function () {
 
 ?>
 
-<div>
-    <div class="flex flex-col p-12 h-screen">
-        <livewire:preview type="note" :data="$this->nullIfEmpty($notes)"/>
-        <livewire:preview type="record" :data="$this->nullIfEmpty($records)"/>
-        <livewire:preview type="event" :data="$this->nullIfEmpty($events)"/>
-    </div>
-    <button wire:click="test" class="dark:text-gray-300">test</button>
+<div class="flex flex-col p-5 h-max">
+    <livewire:preview type="note" :data="$this->nullIfEmpty($notes)"/>
+    <livewire:preview type="record" :data="$this->nullIfEmpty($records)"/>
+    <livewire:preview type="event" :data="$this->nullIfEmpty($events)"/>
 </div>
