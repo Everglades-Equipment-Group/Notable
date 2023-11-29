@@ -26,6 +26,13 @@ $getEvents = function () {
     $this->events = auth()->user()->events()->orderBy($this->sortBy, $this->sortDirection)->orderBy('start_time')->get();
 };
 
+// $getRecurrences = function () {
+//     $recurringEvents = $this->events->where('recurring', true);
+//     $recurringEvents->each(function ($event) {
+//         $event->frequency = $this->events->where('recurring_id', $event->id);
+//     });
+// };
+
 $buildMonth = function ($month, $year) {
     $startOfMonth = CarbonImmutable::create($year, $month, 1);
     $startOfMonth = $startOfMonth->startOfMonth();
@@ -234,7 +241,10 @@ updated([
         </div>
 <!-- END SETTINGS ------------------------------------------------->
         @if($this->view == 'calendar')
-        <div class="pt-5">
+        <div x-data="{ openMonthPicker: false }"
+            @close.stop="openMonthPicker = false"
+            class="pt-5"
+        >
             <div class="flex justify-between items-center px-6">
                 <button wire:click="changeMonth(-1)"
                     class="fa-solid fa-angle-left text-2xl text-blue-400"
@@ -242,8 +252,55 @@ updated([
                 <button wire:click="changeYear(-1)"
                     class="fa-solid fa-angles-left text-2xl text-blue-400"
                 ></button>
-                <div class="p-2 text-xl text-center tracking-wider">
+                <div @click="[
+                        openMonthPicker = ! openMonthPicker,
+                        $nextTick(() => {
+                            $refs[
+                                'month-{{ $this->calendar['month'] }}'
+                            ].scrollIntoView({ block: 'center' });
+                            $refs[
+                                'year-{{ $this->calendar['year'] }}'
+                            ].scrollIntoView({ block: 'center' });
+                        })
+                    ]"
+                    @click.outside="openMonthPicker = false"
+                    class="relative w-3/5 p-2 text-xl text-center tracking-wider"
+                >
                 {{ $this->calendar['month_name'] }} {{ $this->calendar['year'] }}
+                    <div x-show="openMonthPicker"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        style="display: none;"
+                        class="absolute -bottom-2 left-0 w-full h-16 flex text-center bg-gray-900 overflow-hidden after:absolute after:bottom-0 after:left-0 after:w-full after:h-full after:z-10 after:bg-gradient-to-b after:from-gray-900 after:from-5% after:via-transparent after:via-50% after:to-gray-900 after:to-95% after:pointer-events-none"
+                    >
+                        <div class="flex flex-col h-full w-auto overflow-y-scroll py-5"
+                        >
+                            @foreach(range(1, 12) as $month)
+                            <button wire:click="changeMonth({{ $month - $this->calendar['month'] }})"
+                                wire:key="month-{{ $month }}"
+                                x-ref="month-{{ $month }}"
+                                class="text-right tracking-wider px-1"
+                            >
+                                {{ date('F', mktime(0, 0, 0, $month, 1)) }}
+                            </button>
+                            @endforeach
+                        </div>
+                        <div class="flex flex-col h-full w-auto overflow-y-scroll py-5">
+                            @foreach(range(1900, 2100) as $year)
+                            <button wire:click="changeYear({{ $year - $this->calendar['year'] }})"
+                                wire:key="year-{{ $year }}"
+                                x-ref="year-{{ $year }}"
+                                class="text-left tracking-wider px-1"
+                            >
+                                {{ $year }}
+                            </button>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
                 <button wire:click="changeYear(1)"
                     class="fa-solid fa-angles-right text-2xl text-blue-400"
@@ -252,6 +309,7 @@ updated([
                     class="fa-solid fa-angle-right text-2xl text-blue-400"
                 ></button>
             </div>
+            
             <table class="m-auto text-center month">
                 <thead>
                     <tr class="tracking-wider">
@@ -316,7 +374,7 @@ updated([
                         placeholder="search events"
                         class="my-1 w-full"
                     />
-                    <div class="py-1">
+                    <div class="py-1 overflow-scroll">
                         @foreach($this->searchResults as $event)
                         <div wire:key="search-{{ $event->id }}"
                             wire:click="viewEvent({{ $event->id }})"
