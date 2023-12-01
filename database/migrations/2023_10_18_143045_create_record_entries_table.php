@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('record_id')->constrained()->cascadeOnDelete();
             $table->float('amount');
-            $table->string('info')->nullable();
+            $table->char('info', 255)->nullable();
             $table->timestamps();
         });
     }

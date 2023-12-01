@@ -11,14 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('events', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete()->change();
-            $table->string('title')->default('New Event')->change();
+        Schema::create('events', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('title')->default('New Event');
             $table->string('info')->nullable();
-            $table->dateTime('start')->change();
-            $table->dateTime('end')->change();
             $table->boolean('all_day')->default(false);
             $table->string('recurring')->nullable();
+            $table->unsignedSmallInteger('frequency')->default(1);
+            $table->date('start_date')->default(now());
+            $table->date('end_date')->nullable();
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
         });
     }
 

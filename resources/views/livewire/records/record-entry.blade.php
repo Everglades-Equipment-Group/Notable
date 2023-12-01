@@ -10,7 +10,6 @@ state([
     'entry' => '',
     'amount' => '',
     'info' => '',
-    'when' => '',
     'time' => '',
     'date' => '',
 ]);
@@ -29,8 +28,7 @@ state([
 mount(function () {
     $this->amount = $this->entry->amount;
     $this->info = $this->entry->info;
-    $this->when = $this->entry->created_at->format('Y-m-d\Th:m');
-    $this->time = $this->entry->created_at->format('h:m');
+    $this->time = $this->entry->created_at->format('h:i');
     $this->date = $this->entry->created_at->format('Y-m-d');
 });
 
@@ -44,7 +42,8 @@ on(['delete-record-entries' => $destroy]);
 updated([
     'amount' => fn () => $this->entry->update(['amount' => $this->amount]),
     'info' => fn () => $this->entry->update(['info' => $this->info]),
-    'when' => fn () => $this->entry->update(['created_at' => $this->when])
+    'time' => fn () => $this->entry->update(['created_at' => $this->date.' '.$this->time.':00']),
+    'date' => fn () => $this->entry->update(['created_at' => $this->date.' '.$this->time.':00']),
 ]);
 
 ?>
@@ -60,19 +59,13 @@ updated([
         <div>{{ $this->units }} of {{ $this->measuring }}</div>
         @endif
         @if($this->showTime)
-        <x-text-input 
+        <x-time-input 
             wire:model.change="time"
-            placeholder="time"
-            class="shrink border-none focus:border"
-            type="time"
         />
         @endif
         @if($this->showDate)
-        <x-text-input 
+        <x-date-input 
             wire:model.change="date"
-            placeholder="date"
-            class="shrink border-none focus:border"
-            type="date"
         />
         @endif
     </div>

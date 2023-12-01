@@ -104,8 +104,8 @@ mount(function () {
         $this->showTotal = $this->pivot['show_total'];
         $this->showTimeframe = $this->pivot['show_timeframe'];
         if ($this->record->entries()->first()) {
-            $this->from = $this->record->entries()->oldest()->first()->created_at->format('Y-m-d\Th:m');
-            $this->to = $this->record->entries()->latest()->first()->created_at->format('Y-m-d\Th:m');
+            $this->from = $this->record->entries()->oldest()->first()->created_at->format('Y-m-d\Th:i');
+            $this->to = $this->record->entries()->latest()->first()->created_at->format('Y-m-d\Th:i');
         };
     };
 
@@ -314,6 +314,7 @@ updated([
                 @endif
             </div>
         </div>
+<!-- END SETTINGS ------------------------------------------------------------->
         <textarea
             wire:model.change="info"
             placeholder="details..."

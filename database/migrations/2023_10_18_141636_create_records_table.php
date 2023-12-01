@@ -15,12 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('title');
-            $table->string('info')->nullable();
+            $table->char('info', 255)->nullable();
             $table->string('units')->nullable();
             $table->string('measuring')->nullable();
-            $table->string('sort_by')->default('created_at');
-            $table->string('sort_direction')->default('asc');
-            $table->string('input_at')->default('top');
             $table->timestamps();
         });
     }

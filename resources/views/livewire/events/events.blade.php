@@ -29,7 +29,7 @@ $getEvents = function () {
 // $getRecurrences = function () {
 //     $recurringEvents = $this->events->where('recurring', true);
 //     $recurringEvents->each(function ($event) {
-//         $event->frequency = $this->events->where('recurring_id', $event->id);
+//         
 //     });
 // };
 
@@ -141,7 +141,7 @@ updated([
 
 ?>
 
-<div class="flex flex-col items-center p-3 dark:text-gray-300">
+<div class="flex flex-col items-center px-3 pb-3 dark:text-gray-300">
     <div x-data="{ open: false }"
         @close.stop="open = false"
         class="sticky top-20 w-full py-4 dark:bg-gray-900"
@@ -275,7 +275,7 @@ updated([
                         x-transition:leave-start="opacity-100 scale-100"
                         x-transition:leave-end="opacity-0 scale-95"
                         style="display: none;"
-                        class="absolute -bottom-2 left-0 w-full h-16 flex text-center bg-gray-900 overflow-hidden after:absolute after:bottom-0 after:left-0 after:w-full after:h-full after:z-10 after:bg-gradient-to-b after:from-gray-900 after:from-5% after:via-transparent after:via-50% after:to-gray-900 after:to-95% after:pointer-events-none"
+                        class="absolute -bottom-2 left-0 w-full h-16 flex justify-center text-center bg-gray-900 overflow-hidden after:absolute after:bottom-0 after:left-0 after:w-full after:h-full after:z-10 after:bg-gradient-to-b after:from-gray-900 after:from-5% after:via-transparent after:via-50% after:to-gray-900 after:to-95% after:pointer-events-none"
                     >
                         <div class="flex flex-col h-full w-auto overflow-y-scroll py-5"
                         >

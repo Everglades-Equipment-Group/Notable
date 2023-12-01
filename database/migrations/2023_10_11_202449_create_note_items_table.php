@@ -14,8 +14,11 @@ return new class extends Migration
         Schema::create('note_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('note_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('title');
-            $table->boolean('checked');
+            $table->char('info', 255)->nullable();
+            $table->boolean('checked')->default(false);
+            $table->integer('position')->nullable();
             $table->timestamps();
         });
     }
