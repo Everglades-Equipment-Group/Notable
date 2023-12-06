@@ -28,21 +28,21 @@ Route::view('profile', 'profile')
     ->name('profile');
 
 // to use component as full page
-Volt::route('/notifications', 'notifications');
+Volt::route('/notifications', 'notifications')->middleware(['auth', 'verified']);
 
 Volt::route('/note/{id}', 'notes/note', function (Request $request, string $id) {
     return 'Note '.$id;
-});
+})->middleware(['auth', 'verified']);
 
 Volt::route('/record/{id}', 'records/record', function (Request $request, string $id) {
     return 'Record '.$id;
-});
+})->middleware(['auth', 'verified']);
 
 Volt::route('/event/{id}', 'events/event', function (Request $request, string $id) {
     return 'Event '.$id;
-});
+})->middleware(['auth', 'verified']);
 
-Volt::route('/events', 'events/events');
+Volt::route('/events', 'events/events')->middleware(['auth', 'verified']);
 
 // Route::view('note', 'livewire.notes.note')
 //     ->middleware(['auth'])
