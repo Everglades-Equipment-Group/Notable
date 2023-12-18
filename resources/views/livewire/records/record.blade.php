@@ -1,8 +1,5 @@
 <?php
 
-// datetime updateable, format selection?
-// show / hide time, date, entry details
-
 use function Livewire\Volt\{on, booted, updated, mount, layout, rules, state};
 use App\Models\Record;
 use App\Models\RecordEntry;
@@ -398,6 +395,37 @@ updated([
             />
             @endif
         </div>
+    </div>
+    <div class="w-full h-52">
+        @assets
+            <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+        @endassets
+        @script
+            <!-- <script>
+                window.onload = function () {
+                    var chart = new CanvasJS.Chart("chartContainer", {
+                        data: [              
+                        {
+                            type: "column",
+                            dataPoints: [
+                                $entries.map( as $entry) {
+
+                                }
+                                { label: "{{ $entry->created_at }}", y: {{ $entry->amount }} },
+                                { label: "apple",  y: 10  },
+                                { label: "orange", y: 15  },
+                                { label: "banana", y: 25  },
+                                { label: "mango",  y: 30  },
+                                { label: "grape",  y: 28  }
+                            ]
+                        }
+                        ]
+                    });
+                    chart.render();
+                }
+            </script> -->
+        @endscript
+        <div id="chartContainer" class="w-full h-full border border-blue-500"></div>
     </div>
     <button wire:click="test" class="dark:text-gray-300">test</button>
 </div>

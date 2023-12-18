@@ -16,11 +16,13 @@
         "vite": "^4.0.0"
     },
     "dependencies": {
+        "@canvasjs/charts": "^3.7.31",
         "@fullcalendar/core": "^6.1.9",
         "@fullcalendar/daygrid": "^6.1.9",
         "@fullcalendar/interaction": "^6.1.9",
         "@fullcalendar/list": "^6.1.9",
         "@fullcalendar/timegrid": "^6.1.9",
+        "canvasjs": "^1.8.3",
         "fullcalendar": "^6.1.9"
     }
 }
