@@ -48,7 +48,7 @@ $test = function () {
 
 ?>
 
-<div class="flex flex-col p-5 h-max">
+<div class="flex flex-col p-5 h-max bg-inherit">
     <livewire:preview type="note" :data="$this->nullIfEmpty($notes)"/>
     <livewire:preview type="record" :data="$this->nullIfEmpty($records)"/>
     <livewire:preview type="event" :data="$this->nullIfEmpty($events)"/>

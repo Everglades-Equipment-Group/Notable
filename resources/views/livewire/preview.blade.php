@@ -33,7 +33,7 @@ $viewAll = function () {
 
 ?>
 
-<div class="flex flex-col items-center border border-blue-400 rounded-lg h-56 my-3 px-4 pb-4 dark:text-gray-300">
+<div class="flex flex-col items-center border border-blue-400 rounded-lg h-56 my-3 px-4 pb-4 bg-inherit dark:text-gray-300">
     <div class="flex items-center justify-between h-1/5 w-full dark:text-gray-300">
         <button wire:click="newItem" class="h-full pr-5 border-r-2 border-blue-400 rounded-xl">New</button>
         <div wire:click="viewAll" class="p-1 tracking-wider">
@@ -55,14 +55,14 @@ $viewAll = function () {
                 x-transition:leave-end="opacity-0 scale-95"
                 style="display: none;"
                 @click="open = false"
-                class="absolute z-10 p-2 rounded-md shadow-lg border border-t-0 border-e-0 border-gray-500 dark:bg-gray-900"
+                class="absolute z-10 p-2 rounded-md shadow-lg border border-t-0 border-e-0 border-gray-500 bg-inherit"
             >
                 <button wire:click="sort('alpha')" class="py-1">Alpha</button>
                 <button wire:click="sort('chrono')" class="py-1">Chrono</button>
             </div>
         </div>
     </div>
-    <div class="flex flex-col justify-start items-center border border-blue-400 overflow-y-scroll py-2 bg-gray-900 rounded-lg h-4/5 w-full p-4">
+    <div class="flex flex-col justify-start items-center border border-blue-400 overflow-y-scroll py-2 bg-inherit rounded-lg h-4/5 w-full p-4">
         @if ($data)
         @foreach ($data as $item)
         <div class="w-full">

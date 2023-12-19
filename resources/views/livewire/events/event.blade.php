@@ -191,7 +191,7 @@ updated([
     <div x-data="{ open: false }"
         @click.outside="open = false"
         @close.stop="open = false"
-        class="sticky top-16 w-full py-4 dark:bg-gray-900"
+        class="sticky top-16 w-full py-4 bg-inherit z-10"
     >
         <div class="flex items-center justify-between w-full py-5 px-20">
             <button
@@ -247,16 +247,16 @@ updated([
             x-transition:leave="transition ease-in duration-75"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
-            class="flex flex-col items-center p-2 pb-5 dark:bg-gray-900 dark:text-gray-300"
+            class="flex flex-col items-center p-2 pb-5 bg-inherit dark:text-gray-300"
             style="display: none;"
         >
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
-            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 dark:bg-gray-900">Settings</div>
+            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Settings</div>
             <div class="w-full flex flex-col justify-between">
 
             </div>
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
-            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 dark:bg-gray-900">Sharing</div>
+            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Sharing</div>
             <div class="w-full flex flex-col justify-between">
                 @if($this->can_share)
                 <div>
@@ -359,7 +359,7 @@ updated([
         <textarea
             wire:model.change="info"
             placeholder="details..."
-            class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+            class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm dark:border-gray-700 bg-inherit dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
             {{ $this->can_edit ? '' : 'readonly' }}
         ></textarea>
     </div>
@@ -381,7 +381,7 @@ updated([
                 />
                 <x-text-button
                     @click="openEvery = ! openEvery"
-                    class="{{ $this->recurring ? 'bg-blue-400 dark:bg-blue-400 text-gray-300 dark:text-gray-900' : '' }}"
+                    class="{{ $this->recurring ? 'bg-blue-400 text-gray-300 dark:text-gray-900' : '' }}"
                 >
                     every
                 </x-text-button>
@@ -398,7 +398,7 @@ updated([
                 />
                 <x-text-button
                     wire:click="toggleAllDay"
-                    class="{{ $this->allDay ? 'bg-blue-400 dark:bg-blue-400 text-gray-300 dark:text-gray-900' : '' }}"
+                    class="{{ $this->allDay ? 'bg-blue-400 text-gray-300 dark:text-gray-900' : '' }}"
                 >
                     all day
                 </x-text-button>
@@ -411,7 +411,7 @@ updated([
             x-transition:leave="transition ease-in duration-75"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
-            class="flex items-center rounded-lg my-3 border border-blue-400 overflow-hidden dark:bg-gray-900"
+            class="flex items-center rounded-lg my-3 border border-blue-400 overflow-hidden bg-inherit"
             style="display: none;"
         >
             <x-text-input

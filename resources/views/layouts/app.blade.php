@@ -22,11 +22,11 @@
         <script src="https://kit.fontawesome.com/fc35780c3c.js" crossorigin="anonymous"></script>
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div class="min-h-screen bg-slate-100 dark:bg-slate-900">
             <livewire:layout.navigation />
             
             <!-- Page Content -->
-            <main>
+            <main class="bg-inherit">
                 {{ $slot }}
             </main>
         </div>

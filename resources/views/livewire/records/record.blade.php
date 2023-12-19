@@ -201,11 +201,11 @@ updated([
 
 ?>
 
-<div class="flex flex-col items-center max-w-full px-3">
+<div class="flex flex-col items-center max-w-full px-3 bg-inherit">
     <div x-data="{ open: false }"
         @click.outside="open = false"
         @close.stop="open = false"
-        class="sticky top-16 w-full py-4 dark:bg-gray-900"
+        class="sticky top-16 w-full py-4 bg-inherit z-10"
     >
         <div class="flex justify-between items-center px-2 mb-3">
             <button
@@ -245,12 +245,12 @@ updated([
             x-transition:leave="transition ease-in duration-75"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
-            class="w-full flex flex-col items-center p-2 pb-5 dark:bg-gray-900 dark:text-gray-300"
+            class="w-full flex flex-col items-center p-2 pb-5 bg-inherit dark:text-gray-300"
             style="display: none;"
         >
             @if($this->can_sort)
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
-            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 dark:bg-gray-900">Sorting</div>
+            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Sorting</div>
             <div class="w-full flex justify-between items-center">
                 <button
                     wire:click="sort('created_at')"
@@ -273,7 +273,7 @@ updated([
             </div>
             @endif
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
-            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 dark:bg-gray-900">Settings</div>
+            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Settings</div>
             <div class="w-full flex flex-col justify-between">
                 <button
                     wire:click="toggleInputAt"
@@ -315,7 +315,7 @@ updated([
         <textarea
             wire:model.change="info"
             placeholder="details..."
-            class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+            class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm bg-inherit dark:border-gray-700 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
         ></textarea>
         <div class="w-full dark:text-gray-300 mt-3">
             <div class="w-full flex items-center">

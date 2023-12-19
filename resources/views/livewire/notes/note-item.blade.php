@@ -135,7 +135,7 @@ boot($calcCols);
         wire:model.change="info"
         rows="{{ strlen($this->info) / 40 + 1 }}"
         placeholder="details..."
-        class="block w-full mt-1 border-gray-300 resize-none focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+        class="block w-full mt-1 border-gray-300 resize-none bg-inherit focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm dark:border-gray-700 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
         {{ $this->can_edit ? '' : 'readonly'}}
     ></textarea>
     @if(auth()->user()->id != $this->creator)
