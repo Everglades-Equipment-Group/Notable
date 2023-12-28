@@ -1,8 +1,9 @@
 <?php
 
-use function Livewire\Volt\{on, booted, updated, mount, layout, rules, state};
+use function Livewire\Volt\{Js, on, booted, updated, mount, layout, rules, state};
 use App\Models\Record;
 use App\Models\RecordEntry;
+// use Livewire\Attributes\Js;
 
 state([
     'user' => auth()->user(),
@@ -35,6 +36,8 @@ state([
     'can_edit' => '',
     'can_delete' => '',
     'can_share' => '',
+    'chartData' => '',
+    'chartType' => 'line',
 ]);
 
 layout('layouts.app');
@@ -50,6 +53,37 @@ $getEntries = function () {
                     ->get();
 
     $this->total = $this->entries->sum('amount');
+    $this->chartData = $this->entries->map(function ($entry) {
+        return [
+            'label' => $entry->created_at->format('m-d-y'),
+            'y' => $entry->amount
+        ];
+    });
+
+    // $this->js('chart.render();');
+
+    // $this->js('
+    //     const chart = new CanvasJS.Chart("chartContainer", {
+    //         animationEnabled: true,
+    //         theme: "light2",
+    //         backgroundColor: "transparent",
+    //         axisX:{
+    //             labelFontColor: "white",
+    //             labelFontSize: 10,
+    //         },
+    //         axisY:{
+    //             labelFontColor: "white",
+    //             labelFontSize: 14,
+    //         },
+    //         data: [              
+    //         {
+    //             type: "{{ $chartType }}" ,
+    //             dataPoints: @json($chartData)
+    //         }
+    //         ]
+    //     });
+    //     chart.render();
+    // ');
 };
 
 mount(function () {
@@ -186,16 +220,27 @@ $toggleDate = function () {
     $this->getEntries();
 };
 
+$setChartType = function ($chartType) {
+    $this->chartType = $chartType;
+};
+
+$compare = function ($id) {
+    // $this->record = Record::find($id);
+    // $this->getEntries();
+};
+
 on(['delete-entry' => function () {
     $this->getEntries();
 }]);
 
-// booted(fn () => $getEntries);
+booted(fn () => $getEntries);
 updated([
     'title' => fn () => $this->record->update(['title' => $this->title]),
     'info' => fn () => $this->record->update(['info' => $this->info]),
     'units' => fn () => $this->record->update(['units' => $this->units]),
     'measuring' => fn () => $this->record->update(['measuring' => $this->measuring]),
+    // 'chartData' => fn () => $this->js('console.log($wire.chartType);'),
+    // 'chartType' => fn () => $this->js('console.log("change");'),
 ]);
 // updated(['newEntry' => $newEntry ]);
 
@@ -310,6 +355,92 @@ updated([
                 >clear all entries</button>
                 @endif
             </div>
+            <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
+            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Charting</div>
+            <div class="w-full flex flex-row flex-wrap justify-between">
+                <button
+                    wire:click="setChartType('column')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >column</button>
+                <button
+                    wire:click="setChartType('line')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >line</button>
+                <button
+                    wire:click="setChartType('area')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >area</button>
+                <button
+                    wire:click="setChartType('spline')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >spline</button>
+                <button
+                    wire:click="setChartType('splineArea')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >spline area</button>
+                <button
+                    wire:click="setChartType('stepLine')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >step line</button>
+                <button
+                    wire:click="setChartType('scatter')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >scatter</button>
+                <button
+                    wire:click="setChartType('stackedColumn')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >stacked column</button>
+                <button
+                    wire:click="setChartType('stackedArea')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >stacked area</button>
+                <button
+                    wire:click="setChartType('stackedColumn100')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >stacked column 100</button>
+                <button
+                    wire:click="setChartType('stackedArea100')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >stacked area 100</button>
+                <button
+                    wire:click="setChartType('pie')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >pie</button>
+                <button
+                    wire:click="setChartType('doughnut')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >doughnut</button>
+                <button
+                    wire:click="setChartType('bar')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >bar</button>
+                <button
+                    wire:click="setChartType('stacked')"
+                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >stacked</button>
+            </div>
+            <div class="w-full flex justify-left pt-4 bg-inherit">
+                <x-dropdown
+                    align="left"
+                    contentClasses="bg-inherit dark:bg-slate-900 border border-slate-600 rounded-md shadow-lg"
+                >
+                    <x-slot name="trigger">
+                        <button class="p-1 m-1 mb-0 border border-slate-600 rounded-md shadow-lg bg-inherit">compare records</button>
+                    </x-slot>
+                    <x-slot name="content" class="border bg-inherit">
+                        @if($this->user->records->count() <= 1)
+                        <div class="w-full flex justify-center">no records to compare</div>
+                        @endif
+                        @foreach($this->user->records->where('id', '!=', $this->id) as $record)
+                        <button wire:click="compare({{ $record->id }})" class="bg-inherit">
+                            <x-dropdown-link class="bg-inherit">
+                                {{ $record->title }}
+                            </x-dropdown-link>
+                        </button>
+                        @endforeach
+                    </x-slot>
+                </x-dropdown>
+            </div>
         </div>
 <!-- END SETTINGS ------------------------------------------------------------->
         <textarea
@@ -396,36 +527,16 @@ updated([
             @endif
         </div>
     </div>
-    <div class="w-full h-52">
+    <div class="w-full">
+        <div id="chartContainer" class="w-full h-72 my-10"></div>
         @assets
-            <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+        <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
         @endassets
-        @script
-            <!-- <script>
-                window.onload = function () {
-                    var chart = new CanvasJS.Chart("chartContainer", {
-                        data: [              
-                        {
-                            type: "column",
-                            dataPoints: [
-                                $entries.map( as $entry) {
-
-                                }
-                                { label: "{{ $entry->created_at }}", y: {{ $entry->amount }} },
-                                { label: "apple",  y: 10  },
-                                { label: "orange", y: 15  },
-                                { label: "banana", y: 25  },
-                                { label: "mango",  y: 30  },
-                                { label: "grape",  y: 28  }
-                            ]
-                        }
-                        ]
-                    });
-                    chart.render();
-                }
-            </script> -->
-        @endscript
-        <div id="chartContainer" class="w-full h-full border border-blue-500"></div>
+        <livewire:chart
+            wire:key="{{ $this->chartType }}-{{ $this->chartData->count() }}"
+            :chartType="$this->chartType"
+            :chartData="$this->chartData"
+        />
     </div>
     <button wire:click="test" class="dark:text-gray-300">test</button>
 </div>

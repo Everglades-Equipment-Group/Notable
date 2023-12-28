@@ -48,16 +48,27 @@ updated([
 
 ?>
 
-<div class="flex justify-between items-center my-1">
-    <div class="w-fit flex items-center">
-        <x-text-input 
+<div class="flex flex-col justify-between items-center my-1">
+    <div class="w-full flex items-center justify-between">
+        <div class="flex items-center">
+            <x-text-input 
             wire:model.change="amount"
             placeholder="amount"
             class="w-1/6 text-center border-none focus:border"
-        />
-        @if($this->showUnits)
-        <div>{{ $this->units }} of {{ $this->measuring }}</div>
+            />
+            @if($this->showUnits)
+            <div>{{ $this->units }} of {{ $this->measuring }}</div>
+            @endif
+        </div>
+        @if($this->can_delete && $this->showDeletes)
+        <button
+            wire:click="destroy"
+            class="fa-regular fa-trash-can ml-6 text-red-500"
+            title="delete entry"
+        ></button>
         @endif
+    </div>
+    <div class="flex items-center">
         @if($this->showTime)
         <x-time-input 
             wire:model.change="time"
@@ -69,11 +80,4 @@ updated([
         />
         @endif
     </div>
-    @if($this->can_delete && $this->showDeletes)
-    <button
-        wire:click="destroy"
-        class="fa-regular fa-trash-can ml-6 text-red-500"
-        title="delete entry"
-    ></button>
-    @endif
 </div>

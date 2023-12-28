@@ -288,19 +288,21 @@ updated([
                 disabled="{{ ! $this->can_edit }}"
             />
             @if($this->showDeletes)
-            @if($this->isOwner)
-            <button
-                wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, type: 'note', message: 'Delete this note?' }})"
-                class="fa-regular fa-trash-can text-2xl text-red-500"
-                title="delete note"
-            ></button>
-            @else
-            <button
-                wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, verb: 'leave', type: 'note', message: 'Leave this note?' }})"
-                class="fa-solid fa-user-xmark text-2xl text-red-500"
-                title="leave note"
-            ></button>
-            @endif
+            <div class="w-6">
+                @if($this->isOwner)
+                <button
+                    wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, type: 'note', message: 'Delete this note?' }})"
+                    class="fa-regular fa-trash-can text-2xl text-red-500"
+                    title="delete note"
+                ></button>
+                @else
+                <button
+                    wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->note->id }}, verb: 'leave', type: 'note', message: 'Leave this note?' }})"
+                    class="fa-solid fa-user-xmark text-2xl text-red-500"
+                    title="leave note"
+                ></button>
+                @endif
+            </div>
             @else
             <div class="h-6 w-6"></div>
             @endif

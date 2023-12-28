@@ -144,7 +144,7 @@ updated([
 <div class="flex flex-col items-center px-3 pb-3 bg-inherit dark:text-gray-300">
     <div x-data="{ open: false }"
         @close.stop="open = false"
-        class="sticky top-20 w-full py-4 z-10"
+        class="sticky top-20 w-full py-4 z-10 bg-inherit"
     >
         <div class="relative flex items-center justify-center pb-1">
             <button
