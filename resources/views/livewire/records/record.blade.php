@@ -3,7 +3,6 @@
 use function Livewire\Volt\{Js, on, booted, updated, mount, layout, rules, state};
 use App\Models\Record;
 use App\Models\RecordEntry;
-// use Livewire\Attributes\Js;
 
 state([
     'user' => auth()->user(),
@@ -36,7 +35,7 @@ state([
     'can_edit' => '',
     'can_delete' => '',
     'can_share' => '',
-    'chartData' => '',
+    'chartData' => [],
     'chartType' => 'line',
 ]);
 
@@ -53,37 +52,16 @@ $getEntries = function () {
                     ->get();
 
     $this->total = $this->entries->sum('amount');
-    $this->chartData = $this->entries->map(function ($entry) {
-        return [
-            'label' => $entry->created_at->format('m-d-y'),
-            'y' => $entry->amount
-        ];
-    });
-
-    // $this->js('chart.render();');
-
-    // $this->js('
-    //     const chart = new CanvasJS.Chart("chartContainer", {
-    //         animationEnabled: true,
-    //         theme: "light2",
-    //         backgroundColor: "transparent",
-    //         axisX:{
-    //             labelFontColor: "white",
-    //             labelFontSize: 10,
-    //         },
-    //         axisY:{
-    //             labelFontColor: "white",
-    //             labelFontSize: 14,
-    //         },
-    //         data: [              
-    //         {
-    //             type: "{{ $chartType }}" ,
-    //             dataPoints: @json($chartData)
-    //         }
-    //         ]
-    //     });
-    //     chart.render();
-    // ');
+    $this->chartData[strval($this->id)] = [
+        'title' => $this->title,
+        'data' => $this->entries->map(function ($entry) {
+            return [
+                'label' => $entry->created_at->format('m-d-y'),
+                'y' => $entry->amount
+            ];
+        }),
+    ];
+    // dd($this->chartData);
 };
 
 mount(function () {
@@ -225,8 +203,21 @@ $setChartType = function ($chartType) {
 };
 
 $compare = function ($id) {
-    // $this->record = Record::find($id);
-    // $this->getEntries();
+    $recordToCompare = Record::find($id);
+    if (array_search($id, array_keys($this->chartData))) {
+        // dd($this->chartData[$id]);
+        unset($this->chartData[$id]);
+    } else {
+        $this->chartData[$id] = [
+            'title' => $recordToCompare->title,
+            'data' => $recordToCompare->entries->map(function ($entry) {
+                return [
+                    'label' => $entry->created_at->format('m-d-y'),
+                    'y' => $entry->amount
+                ];
+            }),
+        ];
+    };
 };
 
 on(['delete-entry' => function () {
@@ -419,28 +410,7 @@ updated([
                     class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
                 >stacked</button>
             </div>
-            <div class="w-full flex justify-left pt-4 bg-inherit">
-                <x-dropdown
-                    align="left"
-                    contentClasses="bg-inherit dark:bg-slate-900 border border-slate-600 rounded-md shadow-lg"
-                >
-                    <x-slot name="trigger">
-                        <button class="p-1 m-1 mb-0 border border-slate-600 rounded-md shadow-lg bg-inherit">compare records</button>
-                    </x-slot>
-                    <x-slot name="content" class="border bg-inherit">
-                        @if($this->user->records->count() <= 1)
-                        <div class="w-full flex justify-center">no records to compare</div>
-                        @endif
-                        @foreach($this->user->records->where('id', '!=', $this->id) as $record)
-                        <button wire:click="compare({{ $record->id }})" class="bg-inherit">
-                            <x-dropdown-link class="bg-inherit">
-                                {{ $record->title }}
-                            </x-dropdown-link>
-                        </button>
-                        @endforeach
-                    </x-slot>
-                </x-dropdown>
-            </div>
+            
         </div>
 <!-- END SETTINGS ------------------------------------------------------------->
         <textarea
@@ -528,15 +498,37 @@ updated([
         </div>
     </div>
     <div class="w-full">
-        <div id="chartContainer" class="w-full h-72 my-10"></div>
+        <div id="chartContainer" class="w-full h-72 mt-10"></div>
         @assets
         <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
         @endassets
         <livewire:chart
-            wire:key="{{ $this->chartType }}-{{ $this->chartData->count() }}"
+            :key="time()"
             :chartType="$this->chartType"
             :chartData="$this->chartData"
         />
+    </div>
+    <div class="w-full flex justify-left pb-20 bg-inherit dark:text-slate-300">
+        <x-dropdown
+            align="left"
+            contentClasses="bg-inherit dark:bg-slate-900 border border-slate-600 rounded-md shadow-lg"
+        >
+            <x-slot name="trigger">
+                <button class="p-1 m-1 mb-0 border border-slate-600 rounded-md shadow-lg bg-inherit">compare records</button>
+            </x-slot>
+            <x-slot name="content" class="border bg-inherit">
+                @if($this->user->records->count() <= 1)
+                <div class="w-full flex justify-center">no records to compare</div>
+                @endif
+                @foreach($this->user->records->where('id', '!=', $this->id) as $record)
+                <button wire:click="compare({{ $record->id }})" class="bg-inherit">
+                    <x-dropdown-link class="bg-inherit">
+                        {{ $record->title }}
+                    </x-dropdown-link>
+                </button>
+                @endforeach
+            </x-slot>
+        </x-dropdown>
     </div>
     <button wire:click="test" class="dark:text-gray-300">test</button>
 </div>

@@ -8,7 +8,6 @@ use Livewire\Attributes\Reactive;
 
 class Chart extends Component
 {
-    // #[Reactive]
     public $chartData;
     public $chartType;
 
@@ -17,24 +16,32 @@ class Chart extends Component
     {
         // return <<<'JS'
         $this->js('
+            console.log(Object.entries($wire.chartData));
+            let data = [];
+            Object.entries($wire.chartData).forEach((item, i) => {
+                console.log(item);
+                data.push({
+                    showInLegend: true,
+                    legendText: item[1]["title"],
+                    type: $wire.chartType ,
+                    dataPoints: item[1]["data"]
+                });
+            });
+            // console.log(data);
             const chart = new CanvasJS.Chart("chartContainer", {
                 animationEnabled: true,
                 theme: "light2",
                 backgroundColor: "transparent",
                 axisX:{
                     labelFontColor: "white",
-                    labelFontSize: 10,
+                    labelFontSize: 12,
                 },
                 axisY:{
                     labelFontColor: "white",
                     labelFontSize: 14,
                 },
-                data: [              
-                {
-                    type: $wire.chartType ,
-                    dataPoints: $wire.chartData
-                }
-                ]
+                data: data        
+                
             });
             chart.render();
         ');
@@ -43,39 +50,14 @@ class Chart extends Component
 
     public function mount($chartType, $chartData)
     {
-        // $this->chartType = $chartType;
-        // $this->chartData = $chartData;
         $this->makeChart();
     }
 
 
     public function render()
     {
-            // $this->js('
-            //     const chart = new CanvasJS.Chart("chartContainer", {
-            //         animationEnabled: true,
-            //         theme: "light2",
-            //         backgroundColor: "transparent",
-            //         axisX:{
-            //             labelFontColor: "white",
-            //             labelFontSize: 10,
-            //         },
-            //         axisY:{
-            //             labelFontColor: "white",
-            //             labelFontSize: 14,
-            //         },
-            //         data: [              
-            //         {
-            //             type: $wire.chartType ,
-            //             dataPoints: $wire.chartData
-            //         }
-            //         ]
-            //     });
-            //     chart.render();
-            // ');
         return view('livewire.chart', [
-            // 'chartType' => $this->chartType,
-            // 'chartData' => $this->chartData,
+
         ]);
     }
 }

@@ -5,6 +5,9 @@
 
 use function Livewire\Volt\{on, updated, mount, state};
 use App\Models\RecordEntry;
+use Carbon\CarbonImmutable;
+
+// date_default_timezone_set("America/New_York");
 
 state([
     'entry' => '',
@@ -28,8 +31,8 @@ state([
 mount(function () {
     $this->amount = $this->entry->amount;
     $this->info = $this->entry->info;
-    $this->time = $this->entry->created_at->format('h:i');
-    $this->date = $this->entry->created_at->format('Y-m-d');
+    $this->time = CarbonImmutable::parse($this->entry->created_at)->setTimezone('America/New_York')->format('H:i');
+    $this->date = CarbonImmutable::parse($this->entry->created_at)->setTimezone('America/New_York')->format('Y-m-d');
 });
 
 $destroy = function () {
@@ -42,8 +45,8 @@ on(['delete-record-entries' => $destroy]);
 updated([
     'amount' => fn () => $this->entry->update(['amount' => $this->amount]),
     'info' => fn () => $this->entry->update(['info' => $this->info]),
-    'time' => fn () => $this->entry->update(['created_at' => $this->date.' '.$this->time.':00']),
-    'date' => fn () => $this->entry->update(['created_at' => $this->date.' '.$this->time.':00']),
+    'time' => fn () => $this->entry->update(['created_at' => CarbonImmutable::parse($this->date.' '.$this->time.':00')->shiftTimezone('America/New_York')->setTimezone('UTC')]),
+    'date' => fn () => $this->entry->update(['created_at' => CarbonImmutable::parse($this->date.' '.$this->time.':00')->shiftTimezone('America/New_York')->setTimezone('UTC')]),
 ]);
 
 ?>
