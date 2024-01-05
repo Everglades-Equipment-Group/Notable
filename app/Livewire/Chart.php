@@ -10,31 +10,41 @@ class Chart extends Component
 {
     public $chartData;
     public $chartType;
+    public $xAxisFormat;
 
     #[Js]
     public function makeChart()
     {
         // return <<<'JS'
         $this->js('
-            console.log(Object.entries($wire.chartData));
             let data = [];
             Object.entries($wire.chartData).forEach((item, i) => {
-                console.log(item);
+                let points = [];
+                item[1]["data"].forEach((set) => {
+                    points.push({
+                        x: new Date(set["x"]),
+                        y: set["y"]
+                    });
+                });
                 data.push({
                     showInLegend: true,
-                    legendText: item[1]["title"],
-                    type: $wire.chartType ,
-                    dataPoints: item[1]["data"]
+                    legendText: item[1]["title"] + " (" + item[1]["total"] + ")",
+                    type: $wire.chartType,
+                    dataPoints: points
                 });
             });
-            // console.log(data);
             const chart = new CanvasJS.Chart("chartContainer", {
                 animationEnabled: true,
                 theme: "light2",
                 backgroundColor: "transparent",
+                legend:{
+                    fontSize: 15,
+                    fontColor: "white"      
+                },
                 axisX:{
                     labelFontColor: "white",
                     labelFontSize: 12,
+                    valueFormatString: $wire.xAxisFormat,
                 },
                 axisY:{
                     labelFontColor: "white",
@@ -56,8 +66,6 @@ class Chart extends Component
 
     public function render()
     {
-        return view('livewire.chart', [
-
-        ]);
+        return view('livewire.chart');
     }
 }

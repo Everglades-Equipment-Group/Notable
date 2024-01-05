@@ -16,7 +16,7 @@ state([
     'showDeletes' => '',
     'showInfo' => false,
     'sortBy' => 'start_date',
-    'sortDirection' => 'asc',
+    'sortDirection' => 'desc',
     'searchBy' => null,
     'searchResults' => [],
 ]);
@@ -135,6 +135,16 @@ $search = function () {
     $this->searchResults = Event::where('title', 'like', '%'.$this->searchBy.'%')->get();
 };
 
+$sort = function ($by) {
+    if ($this->sortBy == $by) {
+        $this->sortDirection = $this->sortDirection == 'asc' ? 'desc' : 'asc';
+    } else {
+        $this->sortBy = $by;
+        $this->sortDirection = 'asc';
+    };
+    $this->getEvents();
+};
+
 updated([
     'searchBy' => $search,
 ]);
@@ -203,7 +213,7 @@ updated([
                 </button>
                 <span class="text-gray-500">|</span>
                 <button
-                    wire:click="sort('created_at')"
+                    wire:click="sort('start_date')"
                     class="py-1"
                 >chronological
                     @if($this->sortBy == 'start_date')

@@ -40,13 +40,18 @@ $destroy = function () {
     $this->dispatch('delete-entry');
 };
 
+$datetimeUpdated = function () {
+    $this->entry->update(['created_at' => CarbonImmutable::parse($this->date.' '.$this->time.':00')->shiftTimezone('America/New_York')->setTimezone('UTC')]);
+    $this->dispatch('entry-updated');
+};
+
 on(['delete-record-entries' => $destroy]);
 
 updated([
     'amount' => fn () => $this->entry->update(['amount' => $this->amount]),
     'info' => fn () => $this->entry->update(['info' => $this->info]),
-    'time' => fn () => $this->entry->update(['created_at' => CarbonImmutable::parse($this->date.' '.$this->time.':00')->shiftTimezone('America/New_York')->setTimezone('UTC')]),
-    'date' => fn () => $this->entry->update(['created_at' => CarbonImmutable::parse($this->date.' '.$this->time.':00')->shiftTimezone('America/New_York')->setTimezone('UTC')]),
+    'time' => fn () => $this->datetimeUpdated(),
+    'date' => fn () => $this->datetimeUpdated(),
 ]);
 
 ?>

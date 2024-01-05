@@ -37,6 +37,7 @@ state([
     'can_share' => '',
     'chartData' => [],
     'chartType' => 'line',
+    'chartXAxisFormat' => 'DD MMM',
 ]);
 
 layout('layouts.app');
@@ -46,22 +47,26 @@ rules([
     'info' => 'string'
 ]);
 
+$getChart = function () {
+    $this->chartData[strval($this->id)] = [
+        'title' => $this->title,
+        'total' => $this->total . ' ' . $this->units,
+        'data' => $this->entries->map(function ($entry) {
+            return [
+                'x' => $entry->created_at,
+                'y' => $entry->amount
+            ];
+        }),
+    ];
+};
+
 $getEntries = function () {
     $this->entries = $this->record->entries()
                     ->orderBy($this->sortBy, $this->sortDirection)
                     ->get();
 
     $this->total = $this->entries->sum('amount');
-    $this->chartData[strval($this->id)] = [
-        'title' => $this->title,
-        'data' => $this->entries->map(function ($entry) {
-            return [
-                'label' => $entry->created_at->format('m-d-y'),
-                'y' => $entry->amount
-            ];
-        }),
-    ];
-    // dd($this->chartData);
+    $this->getChart();
 };
 
 mount(function () {
@@ -202,6 +207,10 @@ $setChartType = function ($chartType) {
     $this->chartType = $chartType;
 };
 
+$setChartFormat = function ($chartFormat) {
+    $this->chartXAxisFormat = $chartFormat;
+};
+
 $compare = function ($id) {
     $recordToCompare = Record::find($id);
     if (array_search($id, array_keys($this->chartData))) {
@@ -210,9 +219,10 @@ $compare = function ($id) {
     } else {
         $this->chartData[$id] = [
             'title' => $recordToCompare->title,
+            'total' => $recordToCompare->entries->sum('amount') . ' ' . $recordToCompare->units,
             'data' => $recordToCompare->entries->map(function ($entry) {
                 return [
-                    'label' => $entry->created_at->format('m-d-y'),
+                    'x' => $entry->created_at,
                     'y' => $entry->amount
                 ];
             }),
@@ -220,9 +230,14 @@ $compare = function ($id) {
     };
 };
 
-on(['delete-entry' => function () {
+on([
+    'delete-entry' => function () {
     $this->getEntries();
-}]);
+    },
+    'entry-updated' => function () {
+        $this->getEntries();
+    },
+]);
 
 booted(fn () => $getEntries);
 updated([
@@ -348,69 +363,50 @@ updated([
             </div>
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Charting</div>
-            <div class="w-full flex flex-row flex-wrap justify-between">
-                <button
-                    wire:click="setChartType('column')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >column</button>
-                <button
-                    wire:click="setChartType('line')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >line</button>
-                <button
-                    wire:click="setChartType('area')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >area</button>
-                <button
-                    wire:click="setChartType('spline')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >spline</button>
-                <button
-                    wire:click="setChartType('splineArea')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >spline area</button>
-                <button
-                    wire:click="setChartType('stepLine')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >step line</button>
-                <button
-                    wire:click="setChartType('scatter')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >scatter</button>
-                <button
-                    wire:click="setChartType('stackedColumn')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >stacked column</button>
-                <button
-                    wire:click="setChartType('stackedArea')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >stacked area</button>
-                <button
-                    wire:click="setChartType('stackedColumn100')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >stacked column 100</button>
-                <button
-                    wire:click="setChartType('stackedArea100')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >stacked area 100</button>
-                <button
-                    wire:click="setChartType('pie')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >pie</button>
-                <button
-                    wire:click="setChartType('doughnut')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >doughnut</button>
-                <button
-                    wire:click="setChartType('bar')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >bar</button>
-                <button
-                    wire:click="setChartType('stacked')"
-                    class="p-1 m-1 border border-slate-600 rounded-md shadow-lg"
-                >stacked</button>
+            <div class="text-lg text-center tracking-wider p-2">
+                Type
             </div>
-            
+            <div class="w-full flex flex-row flex-wrap justify-between">
+                @foreach([
+                    'line',
+                    'column',
+                    'bar',
+                    'pie',
+                    'doughnut',
+                    'spline',
+                    'area',
+                    'splineArea',
+                    'stepLine',
+                    'scatter',
+                    'stacked',
+                    'stackedColumn',
+                    'stackedColumn100',
+                    'stackedArea',
+                    'stackedArea100',
+                ] as $type)
+                <button
+                    wire:click="setChartType('{{ $type }}')"
+                    wire:key="chart-type-{{ $type }}"
+                    class="{{ $this->chartType == $type ? 'bg-blue-400 dark:text-slate-900' : '' }} p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >{{ $type }}</button>
+                @endforeach
+            </div>
+            <div class="text-lg text-center tracking-wider p-2">
+                X-Axis Format
+            </div>
+            <div class="flex justify between items-center">
+                @foreach([
+                    'time' => 'DDD HH:mm',
+                    'day' => 'DD MMM',
+                    'month' => 'MMM YYYY',
+                ] as $formatName => $format)
+                <button
+                    wire:click="setChartFormat('{{ $format }}')"
+                    wire:key="chart-format-{{ $format }}"
+                    class="{{ $this->chartXAxisFormat == $format ? 'bg-blue-400 dark:text-slate-900' : '' }} p-1 m-1 border border-slate-600 rounded-md shadow-lg"
+                >{{ $formatName }}</button>
+                @endforeach
+            </div>
         </div>
 <!-- END SETTINGS ------------------------------------------------------------->
         <textarea
@@ -506,6 +502,7 @@ updated([
             :key="time()"
             :chartType="$this->chartType"
             :chartData="$this->chartData"
+            :xAxisFormat="$this->chartXAxisFormat"
         />
     </div>
     <div class="w-full flex justify-left pb-20 bg-inherit dark:text-slate-300">
