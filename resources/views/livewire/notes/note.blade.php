@@ -8,7 +8,7 @@
 // fix bug can drag when can't sort
 // fix bug when dragging item to end of list
 
-use function Livewire\Volt\{on, booted, updated, mount, layout, rules, state};
+use function Livewire\Volt\{on, booted, updated, mount, layout, rules, messages, state};
 use App\Models\Note;
 use App\Models\NoteItem;
 use App\Models\User;
@@ -46,7 +46,10 @@ layout('layouts.app');
 
 rules([
     'title' => 'required|string',
-    'info' => 'string'
+    'info' => 'string',
+    'shareWith' => 'in:'. User::pluck('name')->implode(','),
+])->messages([
+    'shareWith.in' => 'User not found.',
 ]);
 
 $getItems = function () {
@@ -220,6 +223,7 @@ $toggleItemInfo = function () {
 };
 
 $share = function () {
+    $this->validate(['shareWith' => 'in:'. User::pluck('name')->implode(',')]);
     $this->note->users()->attach(User::where('name', $this->shareWith)->first()->id, ['resource_type' => 'note']);
     
     $this->notify('added '. $this->shareWith .' to note');
@@ -398,6 +402,9 @@ updated([
                         placeholder="by name"
                         class="border-none focus:border"
                     />
+                    @error('shareWith')
+                    <span class="text-red-500 pl-2">{{ $message }}</span>
+                    @enderror
                 </div>
                 @endif
                 <div class="text-lg text-center tracking-wider">

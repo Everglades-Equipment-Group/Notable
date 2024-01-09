@@ -344,7 +344,6 @@ updated([
                                     flex flex-col items-center justify-center h-10 w-10 border-gray-500 rounded-full transition">
                                 <div class="flex justify-between items-center">
                                     <div class="">{{ $day['day'] }}</div>
-                                    <!-- <div class="p-1">{{ $day['events'] }}</div> -->
                                 </div>
                             </div>
                         </td>
@@ -400,46 +399,6 @@ updated([
         </div>
         @endif
     </div>
-    <!-- <div x-data="{ open: false }"
-        @click.outside="open = false"
-        @close.stop="open = false"
-        class="w-full"
-    >
-        <x-text-input
-            @click="open = true"
-            wire:model.change="newEvent"
-            placeholder="new event"
-            class="my-1 w-full"
-        />
-        <div x-show="open"
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transition ease-in duration-75"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95"
-            class="flex flex-col pb-2"
-            style="display: none;"
-        >
-            <textarea
-                placeholder="details..."
-                rows="1"
-                class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
-            ></textarea>
-            <div class="flex items-center justify between">
-                <div class="w-1/6 p-2">start</div>
-                <x-text-input type="date" class="my-1 grow"/>
-            </div>
-            <div class="flex items-center justify between">
-                <div class="w-1/6 p-2">end</div>
-                <x-text-input type="date" class="my-1 grow"/>
-            </div>
-            <div class="flex justify-between py-1">
-                <button class="border border-gray-700 rounded-lg p-2">all day</button>
-                <button class="border border-gray-700 rounded-lg p-2">repeat</button>
-            </div>
-        </div>
-    </div> -->
     @if($this->view == 'list')
     <div class="flex flex-col items-left w-full p-2">
         @foreach($this->events->groupBy('start_date') as $eventsThisDay)

@@ -3,7 +3,7 @@
 // datetime updating
 // display entry details
 
-use function Livewire\Volt\{on, updated, mount, state};
+use function Livewire\Volt\{on, updated, mount, state, rules};
 use App\Models\RecordEntry;
 use Carbon\CarbonImmutable;
 
@@ -28,6 +28,10 @@ state([
     'can_delete' => '',
 ])->reactive();
 
+rules([
+    'amount' => 'numeric',
+]);
+
 mount(function () {
     $this->amount = $this->entry->amount;
     $this->info = $this->entry->info;
@@ -48,7 +52,10 @@ $datetimeUpdated = function () {
 on(['delete-record-entries' => $destroy]);
 
 updated([
-    'amount' => fn () => $this->entry->update(['amount' => $this->amount]),
+    'amount' => function () {
+        $this->validate();
+        $this->entry->update(['amount' => $this->amount]);
+    },
     'info' => fn () => $this->entry->update(['info' => $this->info]),
     'time' => fn () => $this->datetimeUpdated(),
     'date' => fn () => $this->datetimeUpdated(),

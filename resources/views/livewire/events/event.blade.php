@@ -1,6 +1,6 @@
 <?php
 
-use function Livewire\Volt\{on, booted, updated, mount, layout, rules, state};
+use function Livewire\Volt\{on, booted, updated, mount, layout, rules, messages, state};
 use App\Models\Event;
 use App\Models\User;
 
@@ -27,6 +27,12 @@ state([
     'can_edit' => '',
     'can_delete' => '',
     'can_share' => '',
+]);
+
+rules([
+    'shareWith' => 'in:'. User::pluck('name')->implode(','),
+])->messages([
+    'shareWith.in' => 'User not found.',
 ]);
 
 mount(function () {
@@ -118,6 +124,7 @@ $leaveEvent = function () {
 };
 
 $share = function () {
+    $this->validate(['shareWith' => 'in:'. User::pluck('name')->implode(',')]);
     $this->event->users()->attach(User::where('name', $this->shareWith)->first()->id, ['resource_type' => 'event']);
     
     $this->notify('added '. $this->shareWith .' to event');
@@ -187,7 +194,7 @@ updated([
 ]);
 
 ?>
-<div class="flex flex-col items-center px-3 dark:text-gray-300">
+<div class="flex flex-col items-center px-3 dark:text-gray-300 bg-inherit">
     <div x-data="{ open: false }"
         @click.outside="open = false"
         @close.stop="open = false"
@@ -270,6 +277,9 @@ updated([
                         placeholder="by name"
                         class="border-none focus:border"
                     />
+                    @error('shareWith')
+                    <span class="text-red-500 pl-2">{{ $message }}</span>
+                    @enderror
                 </div>
                 @endif
                 <div class="text-lg text-center tracking-wider">

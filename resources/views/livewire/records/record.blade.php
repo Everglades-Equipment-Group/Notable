@@ -1,8 +1,10 @@
 <?php
 
-use function Livewire\Volt\{Js, on, booted, updated, mount, layout, rules, state};
+use function Livewire\Volt\{Js, on, booted, updated, mount, layout, rules, messages, state};
 use App\Models\Record;
 use App\Models\RecordEntry;
+use App\Models\User;
+use Carbon\CarbonImmutable;
 
 state([
     'user' => auth()->user(),
@@ -28,6 +30,8 @@ state([
     'showTime' => true,
     'showDate' => true,
     'showDeletes' => '',
+    'shareWith' => '',
+    'isOwner' => '',
     'isShared' => '',
     'can_sort' => '',
     'can_check' => '',
@@ -44,7 +48,12 @@ layout('layouts.app');
 
 rules([
     'title' => 'required|string',
-    'info' => 'string'
+    'info' => 'string',
+    'newEntry' => 'numeric',
+    'shareWith' => 'in:'. User::pluck('name')->implode(','),
+])->messages([
+    'newEntry' => 'must be a number',
+    'shareWith.in' => 'User not found.',
 ]);
 
 $getChart = function () {
@@ -62,6 +71,10 @@ $getChart = function () {
 
 $getEntries = function () {
     $this->entries = $this->record->entries()
+                    ->where([
+                        ['created_at', '>=', $this->from],
+                        ['created_at', '<=', $this->to],
+                    ])
                     ->orderBy($this->sortBy, $this->sortDirection)
                     ->get();
 
@@ -97,6 +110,7 @@ mount(function () {
         $this->pivot = $this->user->records()->where('resource_id', $this->id)->first()->pivot->toArray();
         $this->id = $this->record->id;
         $this->isOwner = $this->record->user_id == $this->user->id;
+        $this->isShared = $this->record->users()->count() > 1;
         $this->title = $this->record->title;
         $this->info = $this->record->info;
         $this->units = $this->record->units;
@@ -118,30 +132,47 @@ mount(function () {
         $this->showTotal = $this->pivot['show_total'];
         $this->showTimeframe = $this->pivot['show_timeframe'];
         if ($this->record->entries()->first()) {
-            $this->from = $this->record->entries()->oldest()->first()->created_at->format('Y-m-d\Th:i');
-            $this->to = $this->record->entries()->latest()->first()->created_at->format('Y-m-d\Th:i');
+            $this->from = CarbonImmutable::parse($this->record->entries()->oldest()->first()->created_at)->setTimezone('America/New_York')->format('Y-m-d\Th:i');
+            $this->to = CarbonImmutable::parse($this->record->entries()->latest()->first()->created_at)->setTimezone('America/New_York')->format('Y-m-d\Th:i');
         };
     };
 
     $this->getEntries();
 });
 
+$notify = function ($event) {
+    if ($this->isShared) {
+        foreach($this->record->users()->where('user_id', '!=', auth()->user()->id)->get() as $user) {
+            $user->notifications()->create([
+                'from_id' => auth()->user()->id,
+                'event' => $event,
+                'resource_type' => 'record',
+                'resource_id' => $this->record->id,
+            ]);
+        };
+    };
+};
+
 $destroy = function (Record $record) {
+    $this->notify('deleted record');
+
     $this->record->delete();
 
     return $this->redirect('/dashboard', navigate: true);
 };
 
 $createNewEntry = function () {
-    if ($this->newEntry) {
+    $this->validate(['newEntry' => 'numeric']);
+
         $this->record->entries()->create([
             'amount' => $this->newEntry
         ]);
-
+        
         $this->newEntry = '';
-
+        
         $this->getEntries();
-    };
+
+        $this->notify('added entry to record');
 };
 
 $sort = function ($sortBy) {
@@ -214,7 +245,6 @@ $setChartFormat = function ($chartFormat) {
 $compare = function ($id) {
     $recordToCompare = Record::find($id);
     if (array_search($id, array_keys($this->chartData))) {
-        // dd($this->chartData[$id]);
         unset($this->chartData[$id]);
     } else {
         $this->chartData[$id] = [
@@ -230,25 +260,60 @@ $compare = function ($id) {
     };
 };
 
+$share = function () {
+    $this->validate(['shareWith' => 'in:'. User::pluck('name')->implode(',')]);
+    $this->record->users()->attach(User::where('name', $this->shareWith)->first()->id, ['resource_type' => 'record']);
+    
+    $this->notify('added '. $this->shareWith .' to record');
+
+    $this->shareWith = '';
+};
+
+$unshare = function ($userId) {
+    $this->notify('removed '. User::find($userId)->name .' from record');
+
+    $this->record->users()->detach($userId);
+};
+
+$leaveRecord = function () {
+    $this->record->users()->detach(auth()->user()->id);
+
+    $this->notify('left record');
+
+    return $this->redirect('/dashboard');
+};
+
+$toggleAccess = function ($user, $access, $value) {
+    $this->record->users()->updateExistingPivot($user, [$access => ! $value]);
+};
+
 on([
-    'delete-entry' => function () {
-    $this->getEntries();
-    },
-    'entry-updated' => function () {
-        $this->getEntries();
-    },
+    'delete-entry' => $getEntries,
+    'entry-updated' => $getEntries,
+    'leave-record' => $leaveRecord,
 ]);
 
 booted(fn () => $getEntries);
 updated([
-    'title' => fn () => $this->record->update(['title' => $this->title]),
-    'info' => fn () => $this->record->update(['info' => $this->info]),
-    'units' => fn () => $this->record->update(['units' => $this->units]),
-    'measuring' => fn () => $this->record->update(['measuring' => $this->measuring]),
-    // 'chartData' => fn () => $this->js('console.log($wire.chartType);'),
-    // 'chartType' => fn () => $this->js('console.log("change");'),
+    'title' => function () {
+        $this->notify('renamed record: '. $this->record->title .' to');
+        $this->record->update(['title' => $this->title]);
+    },
+    'info' => function () {
+        $this->notify('updated info in record');
+        $this->record->update(['info' => $this->info]);
+    },
+    'units' => function () {
+        $this->notify('updated units in record');
+        $this->record->update(['units' => $this->units]);
+    },
+    'measuring' => function () {
+        $this->notify('updated measuring in record');
+        $this->record->update(['measuring' => $this->measuring]);
+    },
+    'from' => fn () => $this->getEntries(),
+    'to' => fn () => $this->getEntries(),
 ]);
-// updated(['newEntry' => $newEntry ]);
 
 ?>
 
@@ -289,6 +354,7 @@ updated([
             <div class="h-6 w-6"></div>
             @endif
         </div>
+<!-- SETTINGS ------------------------------------------------------------------------->
         <div x-show="open"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"
@@ -362,6 +428,122 @@ updated([
                 @endif
             </div>
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
+            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Sharing</div>
+            <div class="w-full flex flex-col justify-between">
+                @if($this->can_share)
+                <div>
+                    <button
+                        wire:click="share"
+                        class="py-1 text-left"
+                    >add </button>
+                    <x-text-input
+                        wire:model.blur="shareWith"
+                        wire:keydown.enter="share"
+                        placeholder="by name"
+                        class="border-none focus:border"
+                    />
+                    @error('shareWith')
+                    <span class="text-red-500 pl-2">{{ $message }}</span>
+                    @enderror
+                </div>
+                @endif
+                <div class="text-lg text-center tracking-wider">
+                    With:
+                </div>
+                <div class="py-3">
+                    @foreach($this->record->users as $user)
+                        @if($user->id != auth()->user()->id)
+                        <div x-data="{ openAccessPannel: false }"
+                            @close.stop="openAccessPannel = false"
+                            @click.outside="openAccessPannel = false"
+                            wire:key="user-{{ $user->id }}"
+                            class="py-1"
+                        >
+                            <div class="flex justify-between items-center">
+                                <div>{{ $user->name }}</div>
+                                @if($user->id == $this->record->user_id)
+                                <div>owner</div>
+                                @endif
+                                @if($this->isOwner)
+                                <div class="flex">
+                                    <button
+                                        @click="openAccessPannel = ! openAccessPannel"
+                                        class="flex justify-between items-center border border-gray-700 rounded-full pl-1"
+                                        title="access panel"
+                                    >
+                                        @if($user->pivot->can_sort)
+                                        <span class="fa-solid fa-shuffle text-sm text-gray-400 p-1" title="can sort"></span>@endif
+                                        @if($user->pivot->can_check)
+                                        <span class="fa-solid fa-check text-sm text-green-700 p-1" title="can check"></span>@endif
+                                        @if($user->pivot->can_add)
+                                        <span class="fa-solid fa-plus text-sm text-blue-500 p-1" title="can add"></span>@endif
+                                        @if($user->pivot->can_edit)
+                                        <span class="fa-solid fa-scissors text-sm text-yellow-600 p-1" title="can edit"></span>@endif
+                                        @if($user->pivot->can_delete)
+                                        <span class="fa-solid fa-trash text-sm text-red-600 p-1" title="can delete"></span>@endif
+                                        @if($user->pivot->can_share)
+                                        <span class="fa-solid fa-user-plus text-sm text-blue-500 p-1" title="can share"></span>@endif
+                                        <span class="fa-solid fa-key text-blue-400 p-1 ml-1 border border-gray-700 rounded-full" title="access pannel"></span>
+                                    </button>
+                                    @if($this->showDeletes)
+                                    <button
+                                        wire:click="unshare({{ $user->id }})"
+                                        class="fa-regular fa-trash-can ml-6 hover:bg-red-500 dark:text-red-500 dark:hover:text-gray-900 transition"
+                                        title="unshare"
+                                    ></button>
+                                    @endif
+                                </div>
+                                @endif
+                            </div>
+                            <div x-show="openAccessPannel"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-75"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95"
+                                class="flex flex-col items-center py-3"
+                                style="display: none;"
+                            >
+                                <div class="text-lg text-center tracking-wider">Can:</div>
+                                <div class="py-2">
+                                @foreach($user->pivot->toArray() as $key => $value)
+                                    @if(str_starts_with($key, 'can_') && $value)
+                                        <button
+                                            wire:click="toggleAccess({{ $user->id }}, '{{ $key }}', {{ $value }})"
+                                            wire:key="access-{{ $key }}"
+                                            class="border border-gray-700 rounded-lg px-2 py-1 m-1"
+                                            title="toggle {{ $key }}"
+                                        >{{ str_replace('can_', '', $key) }}</button>
+                                    @endif
+                                @endforeach
+                                </div>
+                                <div class="text-lg text-center tracking-wider">Can not:</div>
+                                <div class="py-2">
+                                @foreach($user->pivot->toArray() as $key => $value)
+                                    @if(str_starts_with($key, 'can_') && !$value)
+                                        <button
+                                            wire:click="toggleAccess({{ $user->id }}, '{{ $key }}', {{ $value }})"
+                                            wire:key="access-{{ $key }}"
+                                            class="border border-gray-700 rounded-lg px-2 py-1 m-1"
+                                            title="toggle {{ $key }}"
+                                        >{{ str_replace('can_', '', $key) }}</button>
+                                    @endif
+                                @endforeach
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                    @endforeach
+                </div>
+                @if(!$this->isOwner)
+                    <button
+                        wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->record->id }}, verb: 'leave', type: 'record', message: 'Leave this record?' }})"
+                        class="text-red-500 w-fit my-2"
+                    >leave record</button>
+                @endif
+            </div>
+            <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Charting</div>
             <div class="text-lg text-center tracking-wider p-2">
                 Type
@@ -391,7 +573,7 @@ updated([
                 >{{ $type }}</button>
                 @endforeach
             </div>
-            <div class="text-lg text-center tracking-wider p-2">
+            <div class="text-lg text-center tracking-wider p  -2">
                 X-Axis Format
             </div>
             <div class="flex justify between items-center">
@@ -463,6 +645,9 @@ updated([
                 placeholder="new entry"
                 class="border-none focus:border"
             />
+            @error('newEntry')
+            <span class="error text-red-500 pl-2">{{ $message }}</span>
+            @enderror
             @endif
         </div>
         <div>
@@ -490,6 +675,7 @@ updated([
                 placeholder="new entry"
                 class="border-none focus:border"
             />
+            @error('newEntry') <span class="error">{{ $message }}</span> @enderror
             @endif
         </div>
     </div>
