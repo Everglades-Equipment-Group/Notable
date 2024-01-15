@@ -22,7 +22,6 @@ state([
 ]);
 
 $getEvents = function () {
-    // $this->events = auth()->user()->events()->orderBy($this->sortBy, $this->sortDirection)->latest()->get();
     $this->events = auth()->user()->events()->orderBy($this->sortBy, $this->sortDirection)->orderBy('start_time')->get();
 };
 
@@ -154,7 +153,7 @@ updated([
 <div class="flex flex-col items-center px-3 pb-3 bg-inherit dark:text-gray-300">
     <div x-data="{ open: false }"
         @close.stop="open = false"
-        class="sticky top-20 w-full py-4 z-10 bg-inherit"
+        class="sticky top-20 w-full py-4 z-10 bg-inherit lg:w-1/3"
     >
         <div class="relative flex items-center justify-center pb-1">
             <button
@@ -274,7 +273,7 @@ updated([
                         })
                     ]"
                     @click.outside="openMonthPicker = false"
-                    class="relative w-3/5 p-2 text-xl text-center tracking-wider"
+                    class="relative w-3/5 p-2 text-xl text-center tracking-wider cursor-pointer"
                 >
                 {{ $this->calendar['month_name'] }} {{ $this->calendar['year'] }}
                     <div x-show="openMonthPicker"
@@ -341,7 +340,7 @@ updated([
                                 class="{{ count($day['events']) ? 'bg-blue-400 text-gray-900' : 'border' }}
                                     {{ ! $day['withinMonth'] ? 'text-gray-500 border-gray-700' : '' }}
                                     {{ $day['path'] == $this->viewDay ? 'text-4xl border-none' : '' }}
-                                    flex flex-col items-center justify-center h-10 w-10 border-gray-500 rounded-full transition">
+                                    flex flex-col items-center justify-center h-10 w-10 border-gray-500 rounded-full transition cursor-pointer hover:scale-110 hover:border-white">
                                 <div class="flex justify-between items-center">
                                     <div class="">{{ $day['day'] }}</div>
                                 </div>
@@ -387,7 +386,7 @@ updated([
                         @foreach($this->searchResults as $event)
                         <div wire:key="search-{{ $event->id }}"
                             wire:click="viewEvent({{ $event->id }})"
-                            class="flex justify-between w-full text-left my-2"
+                            class="flex justify-between w-full text-left my-2 cursor-pointer"
                         >
                             <span class="w-3/5">{{ $event->title }}</span>
                             <span>{{ $event->start_date }}</span>
@@ -400,14 +399,14 @@ updated([
         @endif
     </div>
     @if($this->view == 'list')
-    <div class="flex flex-col items-left w-full p-2">
+    <div class="flex flex-col items-left w-full p-2 lg:w-1/3">
         @foreach($this->events->groupBy('start_date') as $eventsThisDay)
         <div x-data="{ openDay: true }"
             @close.stop="openDay = true"
             wire:key="{{ $eventsThisDay[0]->start_date }}"
         >
             <div @click="openDay = ! openDay"
-                class="text-xl text-center tracking-wider bg-blue-400 rounded-full my-3 dark:text-gray-900">
+                class="text-xl text-center tracking-wider bg-blue-400 rounded-full my-3 cursor-row-resize dark:text-gray-900">
                 {{ date('D j M y', strtotime($eventsThisDay[0]->start_date)) }}
             </div>
             @foreach($eventsThisDay as $event)
@@ -421,7 +420,7 @@ updated([
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
                 style="display: none;"
-                class="flex justify-between w-full text-left my-1"
+                class="flex justify-between w-full text-left my-1 cursor-pointer"
             >
                 <div class="flex w-3/5">
                     <div class="">{{ $event->title }}</div>
@@ -462,59 +461,59 @@ updated([
     </div>
     @endif
     @if($this->view == 'calendar')
-        <div class="p-2 w-full">
-            @foreach($this->viewEvents as $event)
-                <div wire:key="{{ $event->id }}"
-                    wire:click="viewEvent({{ $event->id }})"
-                    class="flex flex-col w-full justify-between items-center text-left my-2"
-                >
-                    <div class="flex w-full justify-between">
-                        <div class="pr-4">
-                            {{ $event->title }}
-                            @if($event->users->count() > 1)
-                            <span class="pl-1 text-red-500">
-                                @if($event->user_id == auth()->user()->id)
-                                    &<span class="fa-solid fa-angle-right text-blue-400"></span>
-                                @else
-                                    <span class="fa-solid fa-angle-left text-blue-400"></span>&
-                                @endif
-                            </span>
+    <div class="p-2 w-full lg:w-1/3">
+        @foreach($this->viewEvents as $event)
+            <div wire:key="{{ $event->id }}"
+                wire:click="viewEvent({{ $event->id }})"
+                class="flex flex-col w-full justify-between items-center text-left my-2"
+            >
+                <div class="flex w-full justify-between">
+                    <div class="pr-4">
+                        {{ $event->title }}
+                        @if($event->users->count() > 1)
+                        <span class="pl-1 text-red-500">
+                            @if($event->user_id == auth()->user()->id)
+                                &<span class="fa-solid fa-angle-right text-blue-400"></span>
+                            @else
+                                <span class="fa-solid fa-angle-left text-blue-400"></span>&
+                            @endif
+                        </span>
+                        @endif
+                    </div>
+                    <div class="">
+                        @if(! $event->all_day)
+                        <div class="flex">
+                            @if($event->start_time)
+                            <div>{{ date('H:i', strtotime($event->start_time)) }}</div>
+                            @endif
+                            @if($event->start_time && $event->end_time)
+                            <span class="px-2"> - </span>
+                            @endif
+                            @if($event->end_time)
+                            <div>{{ date('H:i', strtotime($event->end_time)) }}</div>
                             @endif
                         </div>
-                        <div class="">
-                            @if(! $event->all_day)
-                            <div class="flex">
-                                @if($event->start_time)
-                                <div>{{ date('H:i', strtotime($event->start_time)) }}</div>
-                                @endif
-                                @if($event->start_time && $event->end_time)
-                                <span class="px-2"> - </span>
-                                @endif
-                                @if($event->end_time)
-                                <div>{{ date('H:i', strtotime($event->end_time)) }}</div>
-                                @endif
-                            </div>
-                            @endif
-                            @if($event->end_date > $this->viewDay)
-                            <div>
-                                <span class="fa-solid fa-arrow-right-long text-sm text-blue-400 pr-1"></span>
-                                {{ $event->end_date }}
-                            </div>
-                            @endif
+                        @endif
+                        @if($event->end_date > $this->viewDay)
+                        <div>
+                            <span class="fa-solid fa-arrow-right-long text-sm text-blue-400 pr-1"></span>
+                            {{ $event->end_date }}
                         </div>
+                        @endif
                     </div>
-                    @if($event->info && $this->showInfo)
-                    <div class="w-full py-2">
-                        {{ $event->info }}
-                    </div>
-                    @endif
                 </div>
-                <hr class="border-none h-px bg-gray-700 w-full">
-            @endforeach
-        </div>
+                @if($event->info && $this->showInfo)
+                <div class="w-full py-2">
+                    {{ $event->info }}
+                </div>
+                @endif
+            </div>
+            <hr class="border-none h-px bg-gray-700 w-full">
+        @endforeach
+    </div>
     @endif
     @if($this->view == 'schedule')
-    <div>
+    <div class="lg:w-1/3">
         <livewire:events.schedule :events="$this->events" />
     </div>
     @endif

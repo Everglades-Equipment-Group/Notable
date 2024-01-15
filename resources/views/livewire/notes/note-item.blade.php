@@ -88,7 +88,8 @@ boot($calcCols);
 
 ?>
 
-<div 
+<div
+    wire:sortable.item="{{ $this->item->id }}"
     class="my-1"
 >
     <div class="flex justify-between items-center">

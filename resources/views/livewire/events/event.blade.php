@@ -198,7 +198,7 @@ updated([
     <div x-data="{ open: false }"
         @click.outside="open = false"
         @close.stop="open = false"
-        class="sticky top-16 w-full py-4 bg-inherit z-10"
+        class="sticky top-16 w-full py-4 bg-inherit z-10 lg:w-1/3"
     >
         <div class="flex items-center justify-between w-full py-5 px-20">
             <button
@@ -257,11 +257,6 @@ updated([
             class="flex flex-col items-center p-2 pb-5 bg-inherit dark:text-gray-300"
             style="display: none;"
         >
-            <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
-            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Settings</div>
-            <div class="w-full flex flex-col justify-between">
-
-            </div>
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Sharing</div>
             <div class="w-full flex flex-col justify-between">
@@ -376,7 +371,7 @@ updated([
     <div x-data="{ openEvery: false }"
         @click.outside="openEvery = false"
         @close.stop="openEvery = false"
-        class="w-full"
+        class="w-full lg:w-1/3"
     >
         <div class="flex w-full justify-evenly">
             <div class="flex flex-col items-center justify-between">

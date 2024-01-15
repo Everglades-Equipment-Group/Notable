@@ -317,11 +317,11 @@ updated([
 
 ?>
 
-<div class="flex flex-col items-center max-w-full px-3 bg-inherit">
+<div class="flex flex-col items-center max-w-full px-3 bg-inherit h-auto">
     <div x-data="{ open: false }"
         @click.outside="open = false"
         @close.stop="open = false"
-        class="sticky top-16 w-full py-4 bg-inherit z-10"
+        class="sticky top-16 w-full py-4 bg-inherit z-10 lg:w-1/3"
     >
         <div class="flex justify-between items-center px-2 mb-3">
             <button
@@ -635,7 +635,7 @@ updated([
             @endif
         </div>
     </div>
-    <div class="dark:text-gray-300 w-full py-2">
+    <div class="dark:text-gray-300 w-full py-2 lg:w-1/3">
         <div>
             @if($this->inputAt == 'top')
             <x-text-input 
@@ -679,7 +679,7 @@ updated([
             @endif
         </div>
     </div>
-    <div class="w-full">
+    <div class="w-full lg:w-1/3">
         <div id="chartContainer" class="w-full h-72 mt-10"></div>
         @assets
         <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
@@ -691,7 +691,7 @@ updated([
             :xAxisFormat="$this->chartXAxisFormat"
         />
     </div>
-    <div class="w-full flex justify-left pb-20 bg-inherit dark:text-slate-300">
+    <div class="w-full flex justify-left pb-20 bg-inherit dark:text-slate-300 lg:w-1/3">
         <x-dropdown
             align="left"
             contentClasses="bg-inherit dark:bg-slate-900 border border-slate-600 rounded-md shadow-lg"
@@ -703,15 +703,16 @@ updated([
                 @if($this->user->records->count() <= 1)
                 <div class="w-full flex justify-center">no records to compare</div>
                 @endif
-                @foreach($this->user->records->where('id', '!=', $this->id) as $record)
-                <button wire:click="compare({{ $record->id }})" class="bg-inherit">
-                    <x-dropdown-link class="bg-inherit">
-                        {{ $record->title }}
-                    </x-dropdown-link>
-                </button>
-                @endforeach
+                <div class="flex flex-col h-fit">
+                    @foreach($this->user->records->where('id', '!=', $this->id) as $record)
+                    <button wire:click="compare({{ $record->id }})" wire:key="compare-{{ $record->id }}" class="bg-inherit">
+                        <x-dropdown-link class="bg-inherit">
+                            {{ $record->title }}
+                        </x-dropdown-link>
+                    </button>
+                    @endforeach
+                </div>
             </x-slot>
         </x-dropdown>
     </div>
-    <button wire:click="test" class="dark:text-gray-300">test</button>
 </div>

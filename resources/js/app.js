@@ -1,6 +1,7 @@
 import './bootstrap';
 
-import '@nextapps-be/livewire-sortablejs';
+import 'livewire-sortable';
+// import '@nextapps-be/livewire-sortablejs';
 
 // import 'canvasjs/dist/canvasjs.3.js';
 // import CanvasJS from '@canvasjs/charts';

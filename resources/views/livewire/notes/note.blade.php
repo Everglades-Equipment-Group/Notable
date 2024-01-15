@@ -153,6 +153,23 @@ $createNewItem = function () {
     };
 };
 
+$updateItem = function ($key, $value, $id) {
+    $item = NoteItem::find($id)->update([$key => $value]);
+    $this->getItems();
+};
+
+$destroyItem = function ($id) {
+    $this->notify('deleted item from note');
+    NoteItem::find($id)->delete();
+    $this->getItems();
+};
+
+$destroyAllItems = function () {
+    $this->notify('deleted all items from note');
+    $this->note->items()->delete();
+    $this->getItems();
+};
+
 $destroy = function () {
     
     // $this->authorize('delete', $note);
@@ -255,6 +272,7 @@ on([
     'delete-item' => $getItems,
     'check' => $getItems,
     'resize' => $getItems,
+    'delete-note-items' => $destroyAllItems,
 ]);
 
 $test = fn () => dd($this->id);
@@ -277,7 +295,7 @@ updated([
     <div x-data="{ open: false }"
         @click.outside="open = false"
         @close.stop="open = false"
-        class="sticky top-16 w-full py-4 bg-inherit"
+        class="sticky top-16 w-full py-4 bg-inherit lg:w-1/3"
     >
         <div class="flex justify-between items-center px-2 mb-3">
             <button
@@ -512,7 +530,7 @@ updated([
             {{ $this->can_edit ? '' : 'readonly' }}
         ></textarea>
     </div>
-    <div class="dark:text-gray-300 w-full p-2">
+    <div class="dark:text-gray-300 w-full p-2 lg:w-1/3">
         <div>
             @if($this->inputAt == 'top' && $this->can_add)
             <x-text-input 
@@ -524,19 +542,84 @@ updated([
             />
             @endif
         </div>
-        <div>
+        <div wire:sortable="updateOrder">
         @foreach($items as $item)
-            <livewire:notes.note-item
+            <div x-data="{ openItemInfo: $wire.showItemInfo }"
+                @close.stop="openItemInfo = false"
+                wire:sortable.item="{{ $item->id }}"
                 wire:key="item-{{ $item->id }}"
-                :$item
-                :showChecks="$this->showChecks"
-                :showAllInfo="$this->showItemInfo"
-                :showDeletes="$this->showDeletes"
-                drag="{{ $this->sortBy == 'position' }}"
-                :can_check="$this->can_check"
-                :can_edit="$this->can_edit"
-                :can_delete="$this->can_delete"
-            />
+                class="my-1"
+            >
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center grow">
+                        @if($this->showChecks)
+                        <button
+                            wire:click="updateItem('checked', {{ $item->checked ? 'false' : 'true' }}, {{ $item->id }})"
+                            class="{{ $item->checked ? 'bg-green-800 border-green-800' : 'border-gray-600'}} h-5 w-5 text-sm border rounded-full mr-2 text-green-600"
+                        ></button>
+                        @endif
+                        <input
+                            value="{{ $item->title }}"
+                            wire:change="updateItem('title', $event.target.value, {{ $item->id }})"
+                            wire:keydown.enter="updateItem('title', $event.target.value, {{ $item->id }})"
+                            placeholder="new item"
+                            class="count-new-lines grow bg-transparent rounded-md border-none pl-1 focus:ring-gray-700 resize-none"
+                            {{ $this->can_edit ? '' : 'readonly'}}
+                        />
+                    </div>
+                    <div>
+                        @if(!$this->showItemInfo)
+                        <button
+                            @click="openItemInfo = ! openItemInfo"
+                            class="{{ $item->info ? 'text-blue-400' : 'text-gray-700' }} fa-solid fa-info ml-5"
+                            title="details"
+                        ></button>
+                        @endif
+                        @if ($this->sortBy == 'position')
+                        <button
+                            wire:sortable.handle
+                            class="fa-solid fa-arrows-up-down ml-5 dark:text-gray-600"
+                            title="drag"
+                        ></button>
+                        @endif
+                        @if($this->can_delete && $this->showDeletes)
+                        <button
+                            wire:click="destroyItem({{ $item->id }})"
+                            class="fa-regular fa-trash-can ml-6 text-red-500"
+                            title="delete item"
+                        ></button>
+                        @endif
+                    </div>
+                </div>
+                @if(!$this->showItemInfo)
+                <div x-show="openItemInfo">
+                    <textarea
+                        wire:change="updateItem('info', $event.target.value, {{ $item->id }})"
+                        wire:keydown.enter="updateItem('info', $event.target.value, {{ $item->id }})"
+                        rows="{{ strlen($this->info) / 40 + 1 }}"
+                        placeholder="details..."
+                        class="block w-full mt-1 border-gray-300 resize-none bg-inherit focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm dark:border-gray-700 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                        {{ $this->can_edit ? '' : 'readonly'}}
+                    >{{ $item->info }}</textarea>
+                    @if(auth()->user()->id != $item->user_id)
+                    <div class="text-sm dark:text-gray-500 pt-2 pl-1">Added by {{ User::find($item->user_id)->name }}</div>
+                    @endif
+                </div>
+                @endif
+                @if($this->showItemInfo)
+                <textarea
+                    wire:change="updateItem('info', $event.target.value, {{ $item->id }})"
+                    wire:keydown.enter="updateItem('info', $event.target.value, {{ $item->id }})"
+                    rows="{{ strlen($this->info) / 40 + 1 }}"
+                    placeholder="details..."
+                    class="block w-full mt-1 border-gray-300 resize-none bg-inherit focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm dark:border-gray-700 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                    {{ $this->can_edit ? '' : 'readonly'}}
+                >{{ $item->info }}</textarea>
+                    @if(auth()->user()->id != $item->user_id)
+                    <div class="text-sm dark:text-gray-500 pt-2 pl-1">Added by {{ User::find($item->user_id)->name }}</div>
+                    @endif
+                @endif
+            </div>
         @endforeach
         </div>
         <div>
@@ -551,5 +634,4 @@ updated([
             @endif
         </div>
     </div>
-    <button wire:click="test" class="dark:text-gray-300">test</button>
 </div>

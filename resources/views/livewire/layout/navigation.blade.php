@@ -35,7 +35,6 @@ new class extends Component
 
 <nav x-data="{ open: false }" class="sticky top-0 bg-inherit dark:bg-slate-800 border-b border-gray-100 dark:border-gray-700 z-20">
     <!-- Primary Navigation Menu -->
-    <button wire:click="test" class="absolute left-20 bottom-5 text-gray-300">test</button>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
