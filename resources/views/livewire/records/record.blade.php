@@ -42,6 +42,7 @@ state([
     'chartData' => [],
     'chartType' => 'line',
     'chartXAxisFormat' => 'DD MMM',
+    'totalEntries' => '',
 ]);
 
 layout('layouts.app');
@@ -131,6 +132,7 @@ mount(function () {
         $this->showDate = $this->pivot['show_date'];
         $this->showTotal = $this->pivot['show_total'];
         $this->showTimeframe = $this->pivot['show_timeframe'];
+        $this->totalEntries = $this->record->entries()->count();
         if ($this->record->entries()->first()) {
             $this->from = CarbonImmutable::parse($this->record->entries()->oldest()->first()->created_at)->setTimezone('America/New_York')->format('Y-m-d\Th:i');
             $this->to = CarbonImmutable::parse($this->record->entries()->latest()->first()->created_at)->setTimezone('America/New_York')->format('Y-m-d\Th:i');
@@ -365,6 +367,9 @@ updated([
             class="w-full flex flex-col items-center p-2 pb-5 bg-inherit dark:text-gray-300"
             style="display: none;"
         >
+            <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
+            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Total</div>
+            <div class="">{{ $this->totalEntries }}</div>
             @if($this->can_sort)
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Sorting</div>

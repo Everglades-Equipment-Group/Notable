@@ -9,6 +9,7 @@ state([
     'notes' => '',
     'sortBy' => '',
     'sortDirection' => '',
+    'total' => '',
 ]);
 
 layout('layouts.app');
@@ -16,6 +17,7 @@ layout('layouts.app');
 mount(function () {
     $this->user = auth()->user();
     $this->notes = $this->user->notes()->latest()->get();
+    $this->total = $this->notes->count();
 });
 
 $newNote = function () {
@@ -52,7 +54,7 @@ $sort = function ($sortBy) {
         $this->sortDirection = 'asc';
     };
 
-    $this->notes->sortBy($this->sortBy, $this->sortDirection);
+    $this->user->notes()->orderBy($this->sortBy, $this->sortDirection);
 };
 
 ?>
@@ -87,6 +89,9 @@ $sort = function ($sortBy) {
             class="flex flex-col items-center p-2 pb-5 bg-inherit dark:text-gray-300"
             style="display: none;"
         >
+            <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
+            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Total</div>
+            <div class="">{{ $this->total }}</div>
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Sorting</div>
             <div class="w-full flex justify-between items-center">
@@ -133,11 +138,22 @@ $sort = function ($sortBy) {
                 <div wire:click="viewNote({{ $note->id }})"
                     class="cursor-pointer"
                 >{{ $note->title }}</div>
-                <button
-                    @click="openNoteInfo = ! openNoteInfo"
-                    class="{{ $note->info ? 'text-blue-400' : 'text-gray-700' }} fa-solid fa-info ml-5"
-                    title="details"
-                ></button>
+                <div>
+                    @if($note->users->count() > 1)
+                    <span class="text-center pr-1 text-red-500">
+                        @if($note->user_id == auth()->user()->id)
+                            &<i class="fa-solid fa-angle-right text-blue-400"></i>
+                        @else
+                            <i class="fa-solid fa-angle-left text-blue-400"></i>&
+                        @endif
+                    </span>
+                    @endif
+                    <button
+                        @click="openNoteInfo = ! openNoteInfo"
+                        class="{{ $note->info ? 'text-blue-400' : 'text-gray-700' }} fa-solid fa-info ml-5"
+                        title="details"
+                    ></button>
+                </div>
             </div>
             <div x-show="openNoteInfo"
                 class="flex justify-between"

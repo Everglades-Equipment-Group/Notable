@@ -38,6 +38,7 @@ state([
     'can_edit' => '',
     'can_delete' => '',
     'can_share' => '',
+    'total' => '',
 ]);
 
 // tells volt which layout to use
@@ -113,6 +114,7 @@ mount(function () {
         $this->can_delete = $this->pivot['can_delete'];
         $this->can_share = $this->pivot['can_share'];
         $this->showDeletes = $this->pivot['show_deletes'];
+        $this->total = $this->note->items()->count();
     }
 
     $this->getItems();
@@ -346,6 +348,9 @@ updated([
             class="flex flex-col items-center p-2 pb-5 bg-inherit dark:text-gray-300"
             style="display: none;"
         >
+            <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
+            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Total</div>
+            <div class="">{{ $this->total }}</div>
             @if($this->can_sort)
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Sorting</div>

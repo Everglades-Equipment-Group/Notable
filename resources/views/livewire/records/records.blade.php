@@ -9,6 +9,7 @@ state([
     'records' => '',
     'sortBy' => '',
     'sortDirection' => '',
+    'total' => '',
 ]);
 
 layout('layouts.app');
@@ -16,6 +17,7 @@ layout('layouts.app');
 mount(function () {
     $this->user = auth()->user();
     $this->records = $this->user->records()->latest()->get();
+    $this->total = $this->records->count();
 });
 
 $newRecord = function () {
@@ -88,6 +90,9 @@ $sort = function ($sortBy) {
             style="display: none;"
         >
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
+            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Total</div>
+            <div class="">{{ $this->total }}</div>
+            <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Sorting</div>
             <div class="w-full flex justify-between items-center">
                 <button
@@ -133,11 +138,22 @@ $sort = function ($sortBy) {
                 <div wire:click="viewRecord({{ $record->id }})"
                     class="cursor-pointer"
                 >{{ $record->title }}</div>
-                <button
-                    @click="openRecordInfo = ! openRecordInfo"
-                    class="{{ $record->info ? 'text-blue-400' : 'text-gray-700' }} fa-solid fa-info ml-5"
-                    title="details"
-                ></button>
+                <div>
+                    @if($record->users->count() > 1)
+                    <span class="text-center pr-1 text-red-500">
+                        @if($record->user_id == auth()->user()->id)
+                            &<i class="fa-solid fa-angle-right text-blue-400"></i>
+                        @else
+                            <i class="fa-solid fa-angle-left text-blue-400"></i>&
+                        @endif
+                    </span>
+                    @endif
+                    <button
+                        @click="openRecordInfo = ! openRecordInfo"
+                        class="{{ $record->info ? 'text-blue-400' : 'text-gray-700' }} fa-solid fa-info ml-5"
+                        title="details"
+                    ></button>
+                </div>
             </div>
             <div x-show="openRecordInfo"
                 class="flex justify-between"

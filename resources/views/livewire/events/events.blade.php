@@ -19,6 +19,7 @@ state([
     'sortDirection' => 'desc',
     'searchBy' => null,
     'searchResults' => [],
+    'total' => '',
 ]);
 
 $getEvents = function () {
@@ -64,6 +65,7 @@ mount(function () {
         $this->viewDay = CarbonImmutable::now()->setTimezone('EST')->format('Y-m-d');
     };
     $this->viewEvents = $this->events->where('start_date', '=', $this->viewDay)->sortBy('start_time');
+    $this->total = $this->events->count();
 });
 
 $newEvent = function () {
@@ -180,6 +182,9 @@ updated([
             class="flex flex-col items-center p-2 pb-5 bg-inherit dark:text-gray-300"
             style="display: none;"
         >
+            <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
+            <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Total</div>
+            <div class="">{{ $this->total }}</div>
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">View</div>
             <div class="w-full flex justify-between items-center">
