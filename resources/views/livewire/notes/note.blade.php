@@ -50,6 +50,7 @@ rules([
     'shareWith' => 'in:'. User::pluck('name')->implode(','),
 ])->messages([
     'shareWith.in' => 'User not found.',
+    'title.required' => 'A title is required.',
 ]);
 
 $getItems = function () {
@@ -279,6 +280,7 @@ $test = fn () => dd($this->id);
 
 updated([
     'title' => function () {
+        $this->validate(['title' => 'required|string']);
         $this->notify('renamed note: '. $this->note->title .' to');
         $this->note->update(['title' => $this->title]);
     },
@@ -297,12 +299,16 @@ updated([
         @close.stop="open = false"
         class="sticky top-16 w-full py-4 bg-inherit lg:w-1/3"
     >
+        @error('title')
+        <span class="block text-red-500 w-full text-center">{{ $message }}</span>
+        @enderror
         <div class="flex justify-between items-center px-2 mb-3">
             <button
                 @click="open = ! open"
                 class="fa-solid fa-sliders text-2xl text-blue-400"
                 title="options"
             ></button>
+            
             <x-text-input 
                 wire:model.change="title"
                 placeholder="Title"
@@ -558,14 +564,14 @@ updated([
                             class="{{ $item->checked ? 'bg-green-800 border-green-800' : 'border-gray-600'}} h-5 w-5 text-sm border rounded-full mr-2 text-green-600"
                         ></button>
                         @endif
-                        <input
-                            value="{{ $item->title }}"
+                        <textarea
                             wire:change="updateItem('title', $event.target.value, {{ $item->id }})"
                             wire:keydown.enter="updateItem('title', $event.target.value, {{ $item->id }})"
                             placeholder="new item"
+                            rows="{{ (strlen($item->title) / 16) }}"
                             class="count-new-lines grow bg-transparent rounded-md border-none pl-1 focus:ring-gray-700 resize-none"
                             {{ $this->can_edit ? '' : 'readonly'}}
-                        />
+                        >{{ $item->title }}</textarea>
                     </div>
                     <div>
                         @if(!$this->showItemInfo)
@@ -575,13 +581,14 @@ updated([
                             title="details"
                         ></button>
                         @endif
-                        @if ($this->sortBy == 'position')
-                        <button
-                            wire:sortable.handle
-                            class="fa-solid fa-arrows-up-down ml-5 dark:text-gray-600"
-                            title="drag"
-                        ></button>
-                        @endif
+                        <div wire:sortable.handle>
+                            @if ($this->sortBy == 'position')
+                            <button
+                                class="fa-solid fa-arrows-up-down ml-5 dark:text-gray-600"
+                                title="drag"
+                            ></button>
+                            @endif
+                        </div>
                         @if($this->can_delete && $this->showDeletes)
                         <button
                             wire:click="destroyItem({{ $item->id }})"

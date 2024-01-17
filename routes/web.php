@@ -44,6 +44,10 @@ Volt::route('/event/{id}', 'events/event', function (Request $request, string $i
 
 Volt::route('/events', 'events/events')->middleware(['auth', 'verified']);
 
+Volt::route('/notes', 'notes/notes')->middleware(['auth', 'verified']);
+
+Volt::route('/records', 'records/records')->middleware(['auth', 'verified']);
+
 // Route::view('note', 'livewire.notes.note')
 //     ->middleware(['auth'])
 //     ->name('note');

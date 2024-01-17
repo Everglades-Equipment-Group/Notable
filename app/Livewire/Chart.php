@@ -18,21 +18,23 @@ class Chart extends Component
         // return <<<'JS'
         $this->js('
             let data = [];
-            Object.entries($wire.chartData).forEach((item, i) => {
-                let points = [];
-                item[1]["data"].forEach((set) => {
-                    points.push({
-                        x: new Date(set["x"]),
-                        y: set["y"]
+            if (Object.entries($wire.chartData)[0][1]["data"]) {
+                Object.entries($wire.chartData).forEach((item, i) => {
+                    let points = [];
+                    item[1]["data"].forEach((set) => {
+                        points.push({
+                            x: new Date(set["x"]),
+                            y: set["y"]
+                        });
+                    });
+                    data.push({
+                        showInLegend: true,
+                        legendText: item[1]["title"] + " (" + item[1]["total"] + ")",
+                        type: $wire.chartType,
+                        dataPoints: points
                     });
                 });
-                data.push({
-                    showInLegend: true,
-                    legendText: item[1]["title"] + " (" + item[1]["total"] + ")",
-                    type: $wire.chartType,
-                    dataPoints: points
-                });
-            });
+            }
             const chart = new CanvasJS.Chart("chartContainer", {
                 animationEnabled: true,
                 theme: "light2",

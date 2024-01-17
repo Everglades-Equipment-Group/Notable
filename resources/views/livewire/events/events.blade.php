@@ -220,16 +220,6 @@ updated([
                     </span>
                     @endif
                 </button>
-                <span class="text-gray-500">|</span>
-                <button
-                    wire:click="sort('position')"
-                    class="py-1"
-                >draggable
-                    @if($this->sortBy == 'position')
-                        <span class="fa-arrow-{{ $this->sortDirection == 'asc' ? 'down' : 'up' }}-long fa-solid pl-1 text-blue-400">
-                        </span>
-                    @endif
-                </button>
             </div>
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Settings</div>
