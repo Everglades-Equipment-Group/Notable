@@ -289,6 +289,12 @@ $toggleAccess = function ($user, $access, $value) {
     $this->record->users()->updateExistingPivot($user, [$access => ! $value]);
 };
 
+// $clearNewText = function () {
+//     if ($this->title == 'New Record') {
+//         $this->title->focus();
+//     };
+// };
+
 on([
     'delete-entry' => $getEntries,
     'entry-updated' => $getEntries,
@@ -333,6 +339,7 @@ updated([
             ></button>
             <x-text-input 
                 wire:model.change="title"
+                @focus="$event.target.select()"
                 placeholder="Title"
                 class="text-2xl border-none text-center focus:border"
                 disabled="{{ ! $this->can_edit }}"
@@ -340,7 +347,6 @@ updated([
             @if($this->showDeletes)
             @if($this->isOwner)
             <button
-                wire:click="destroy"
                 wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->record->id }}, type: 'record', message: 'Delete this record?' }})"
                 class="fa-regular fa-trash-can text-2xl text-red-500"
                 title="delete record"

@@ -313,6 +313,7 @@ updated([
             
             <x-text-input 
                 wire:model.change="title"
+                @focus="$event.target.select()"
                 placeholder="Title"
                 class="text-2xl border-none text-center focus:border"
                 disabled="{{ ! $this->can_edit }}"
@@ -553,7 +554,7 @@ updated([
             />
             @endif
         </div>
-        <div wire:sortable="updateOrder">
+        <div @if($this->sortBy == 'position') wire:sortable="updateOrder" @endif>
         @foreach($items as $item)
             <div x-data="{ openItemInfo: $wire.showItemInfo }"
                 @close.stop="openItemInfo = false"
@@ -573,7 +574,7 @@ updated([
                             wire:change="updateItem('title', $event.target.value, {{ $item->id }})"
                             wire:keydown.enter="updateItem('title', $event.target.value, {{ $item->id }})"
                             placeholder="new item"
-                            rows="{{ (strlen($item->title) / 16) }}"
+                            rows="{{ 1 + (strlen($item->title) / 40) }}"
                             class="count-new-lines grow bg-transparent rounded-md border-none pl-1 focus:ring-gray-700 resize-none"
                             {{ $this->can_edit ? '' : 'readonly'}}
                         >{{ $item->title }}</textarea>
@@ -586,14 +587,12 @@ updated([
                             title="details"
                         ></button>
                         @endif
-                        <div wire:sortable.handle>
-                            @if ($this->sortBy == 'position')
-                            <button
-                                class="fa-solid fa-arrows-up-down ml-5 dark:text-gray-600"
-                                title="drag"
-                            ></button>
-                            @endif
-                        </div>
+                        @if ($this->sortBy == 'position')
+                        <button wire:sortable.handle
+                            class="fa-solid fa-arrows-up-down ml-5 dark:text-gray-600"
+                            title="drag"
+                        ></button>
+                        @endif
                         @if($this->can_delete && $this->showDeletes)
                         <button
                             wire:click="destroyItem({{ $item->id }})"

@@ -228,6 +228,7 @@ updated([
             ></button>
             <x-text-input 
                 wire:model.change="title"
+                @focus="$event.target.select()"
                 placeholder="Title"
                 class="text-2xl border-none text-center focus:border"
                 disabled="{{ ! $this->can_edit }}"
