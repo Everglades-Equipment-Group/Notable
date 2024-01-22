@@ -135,7 +135,7 @@ $sort = function ($sortBy) {
             <div
                 class="flex justify-between w-full"
             >
-                <div wire:click="viewNote({{ $note->id }})"
+                <div wire:click="viewNote-({{ $note->id }})"
                     class="cursor-pointer"
                 >{{ $note->title }}</div>
                 <div>

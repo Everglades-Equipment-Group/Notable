@@ -137,9 +137,9 @@ mount(function () {
             $this->from = CarbonImmutable::parse($this->record->entries()->oldest()->first()->created_at)->setTimezone('America/New_York')->format('Y-m-d\Th:i');
             $this->to = CarbonImmutable::parse($this->record->entries()->latest()->first()->created_at)->setTimezone('America/New_York')->format('Y-m-d\Th:i');
         };
+        $this->getEntries();
     };
 
-    $this->getEntries();
 });
 
 $notify = function ($event) {
@@ -296,6 +296,7 @@ $toggleAccess = function ($user, $access, $value) {
 // };
 
 on([
+    'delete-record' => $destroy,
     'delete-entry' => $getEntries,
     'entry-updated' => $getEntries,
     'leave-record' => $leaveRecord,
