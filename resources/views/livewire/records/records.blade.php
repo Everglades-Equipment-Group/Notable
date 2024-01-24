@@ -127,40 +127,11 @@ $sort = function ($sortBy) {
         class="flex flex-col items-center justify-center w-full pt-5 px-6 lg:w-1/3"
     >
     @foreach ($this->records as $record)
-        <div wire:key="record-{{ $record->id }}"
-            x-data="{ openRecordInfo: false }"
-            @close.stop="openRecordInfo = false"
-            class="w-full my-2"
-        >
-            <div
-                class="flex justify-between w-full"
-            >
-                <div wire:click="viewRecord-({{ $record->id }})"
-                    class="cursor-pointer"
-                >{{ $record->title }}</div>
-                <div>
-                    @if($record->users->count() > 1)
-                    <span class="text-center pr-1 text-red-500">
-                        @if($record->user_id == auth()->user()->id)
-                            &<i class="fa-solid fa-angle-right text-blue-400"></i>
-                        @else
-                            <i class="fa-solid fa-angle-left text-blue-400"></i>&
-                        @endif
-                    </span>
-                    @endif
-                    <button
-                        @click="openRecordInfo = ! openRecordInfo"
-                        class="{{ $record->info ? 'text-blue-400' : 'text-gray-700' }} fa-solid fa-info ml-5"
-                        title="details"
-                    ></button>
-                </div>
-            </div>
-            <div x-show="openRecordInfo"
-                class="flex justify-between"
-            >
-                <div>{{ $record->info }}</div>
-            </div>
-        </div>
+        <livewire:records.records-list-item
+            wire:key="record-{{ $record->id }}"
+            :record="$record"
+        />
+            
     @endforeach
     </div>
 </div>

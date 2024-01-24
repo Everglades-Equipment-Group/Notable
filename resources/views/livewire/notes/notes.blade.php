@@ -54,7 +54,8 @@ $sort = function ($sortBy) {
         $this->sortDirection = 'asc';
     };
 
-    $this->user->notes()->orderBy($this->sortBy, $this->sortDirection);
+    $this->notes = $this->user->notes()->orderBy($this->sortBy, $this->sortDirection)->get();
+    // $this->notes->sortBy($this->sortBy)->values()->all();
 };
 
 ?>
@@ -127,40 +128,10 @@ $sort = function ($sortBy) {
         class="flex flex-col items-center justify-center w-full pt-5 px-6 lg:w-1/3"
     >
     @foreach ($this->notes as $note)
-        <div wire:key="note-{{ $note->id }}"
-            x-data="{ openNoteInfo: false }"
-            @close.stop="openNoteInfo = false"
-            class="w-full my-2"
-        >
-            <div
-                class="flex justify-between w-full"
-            >
-                <div wire:click="viewNote-({{ $note->id }})"
-                    class="cursor-pointer"
-                >{{ $note->title }}</div>
-                <div>
-                    @if($note->users->count() > 1)
-                    <span class="text-center pr-1 text-red-500">
-                        @if($note->user_id == auth()->user()->id)
-                            &<i class="fa-solid fa-angle-right text-blue-400"></i>
-                        @else
-                            <i class="fa-solid fa-angle-left text-blue-400"></i>&
-                        @endif
-                    </span>
-                    @endif
-                    <button
-                        @click="openNoteInfo = ! openNoteInfo"
-                        class="{{ $note->info ? 'text-blue-400' : 'text-gray-700' }} fa-solid fa-info ml-5"
-                        title="details"
-                    ></button>
-                </div>
-            </div>
-            <div x-show="openNoteInfo"
-                class="flex justify-between"
-            >
-                <div>{{ $note->info }}</div>
-            </div>
-        </div>
+        <livewire:notes.notes-list-item
+            wire:key="note-{{ $note->id }}"
+            :note="$note"
+        />
     @endforeach
     </div>
 </div>
