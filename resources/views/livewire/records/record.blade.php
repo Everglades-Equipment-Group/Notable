@@ -160,7 +160,7 @@ $destroy = function (Record $record) {
 
     $this->record->delete();
 
-    return $this->redirect('/dashboard', navigate: true);
+    return $this->redirect('/records');
 };
 
 $createNewEntry = function () {
@@ -282,7 +282,7 @@ $leaveRecord = function () {
 
     $this->notify('left record');
 
-    return $this->redirect('/dashboard');
+    return $this->redirect('/records');
 };
 
 $toggleAccess = function ($user, $access, $value) {

@@ -112,7 +112,7 @@ $destroy = function () {
 
     $this->event->delete();
 
-    return $this->redirect('/dashboard');
+    return $this->redirect('/events');
 };
 
 $leaveEvent = function () {
@@ -120,7 +120,7 @@ $leaveEvent = function () {
 
     $this->notify('left event');
 
-    return $this->redirect('/dashboard');
+    return $this->redirect('/events');
 };
 
 $share = function () {

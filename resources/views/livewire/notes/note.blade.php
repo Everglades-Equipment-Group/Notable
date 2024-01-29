@@ -181,7 +181,7 @@ $destroy = function () {
 
     $this->note->delete();
 
-    return $this->redirect('/dashboard');
+    return $this->redirect('/notes');
 };
 
 $sort = function ($sortBy) {
@@ -262,7 +262,7 @@ $leaveNote = function () {
 
     $this->notify('left note');
 
-    return $this->redirect('/dashboard');
+    return $this->redirect('/notes');
 };
 
 $toggleAccess = function ($user, $access, $value) {
