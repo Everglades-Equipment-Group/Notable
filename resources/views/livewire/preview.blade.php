@@ -6,7 +6,8 @@ state(['data']);
 state([
     'type' => '',
     'id' => 0,
-    'sortBy' => ''
+    'sortBy' => '',
+    'sortDirection' => 'asc',
 ]);
 
 $newItem = function () {
@@ -20,10 +21,17 @@ $viewItem = function ($id) {
 };
 
 $sort = function ($sortBy) {
-    $this->sortBy == $sortBy ?
-        $this->sortBy = $sortBy.'-desc' :
-        $this->sortBy = $sortBy;
-    $this->dispatch('sort-'.$this->type.'s', type: $this->type, sortBy: $this->sortBy);
+    if ($this->sortBy == $sortBy) {
+        $this->sortDirection == 'asc' ?
+        $this->sortDirection = 'desc' :
+        $this->sortDirection = 'asc';
+    } else {
+        $this->sortDirection = 'asc';
+    };
+
+    $this->sortBy = $sortBy;
+    $this->dispatch('sort-'.$this->type.'s', type: $this->type, sortBy: $this->sortBy, sortDirection: $this->sortDirection);
+    // $this->js('console.log("sort-'.$this->type.'s by '.$this->sortBy.' '.$this->sortDirection.'")');
 };
 
 $viewAll = function () {
@@ -57,8 +65,8 @@ $viewAll = function () {
                 @click="open = false"
                 class="absolute z-10 p-2 rounded-md shadow-lg border border-t-0 border-e-0 border-gray-500 bg-inherit"
             >
-                <button wire:click="sort('alpha')" class="py-1">Alpha</button>
-                <button wire:click="sort('chrono')" class="py-1">Chrono</button>
+                <button wire:click="sort('title')" class="py-1">Alpha</button>
+                <button wire:click="sort('created_at')" class="py-1">Chrono</button>
             </div>
         </div>
     </div>

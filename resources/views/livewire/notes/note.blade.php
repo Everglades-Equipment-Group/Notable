@@ -191,7 +191,7 @@ $sort = function ($sortBy) {
             $this->sortDirection = 'asc';
     } else {
         $this->sortDirection = 'asc';
-    }
+    };
 
     $this->sortBy = $sortBy;
     $this->note->users()->updateExistingPivot($this->user->id, [
