@@ -1,11 +1,12 @@
 <?php
 
-use Livewire\Volt\Component;
+use Livewire\Volt\{Component};
+use App\Models\Notification;
 
 new class extends Component
 {
     public $hasNewNotifications = false;
-
+    
     public function boot(): void
     {
         $this->hasNewNotifications = auth()->user()->notifications()->where('read', false)->exists();
@@ -35,7 +36,7 @@ new class extends Component
 
 <nav x-data="{ open: false }" class="sticky top-0 bg-inherit dark:bg-slate-800 border-b border-gray-100 dark:border-gray-700 z-20">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class=" mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
@@ -53,6 +54,21 @@ new class extends Component
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
+                    </x-nav-link>
+                    <x-nav-link href="notes" :active="request()->routeIs('notes')" wire:navigate>
+                        {{ __('Notes') }}
+                    </x-nav-link>
+                    <x-nav-link href="records" :active="request()->routeIs('records')" wire:navigate>
+                        {{ __('Records') }}
+                    </x-nav-link>
+                    <x-nav-link href="events" :active="request()->routeIs('events')" wire:navigate>
+                        {{ __('Events') }}
+                    </x-nav-link>
+                    <x-nav-link href="notifications" :active="request()->routeIs('notifications')" wire:navigate>
+                        {{ __('Notifications') }}
+                    </x-nav-link>
+                    <x-nav-link href="help" :active="request()->routeIs('help')" wire:navigate>
+                        {{ __('Help') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -91,8 +107,8 @@ new class extends Component
 
             <!-- Hamburger -->
             <div class="-mr-1 flex items-center sm:hidden">
-                <button @click="open = ! open" class="relative inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                <button @click="open = ! open" class="relative inline-flex items-center justify-center p-2 rounded-md text-blue-400 dark:text-blue-400 hover:text-red-500 dark:hover:text-red-500 hover:bg-slate-100 dark:hover:bg-slate-900 focus:outline-none focus:bg-slate-100 dark:focus:bg-slate-900 focus:text-red-500 dark:focus:text-blue-400 transition duration-150 ease-in-out">
+                    <svg class="h-8 w-8" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -110,6 +126,15 @@ new class extends Component
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link href="/notes" :active="request()->routeIs('notes')" wire:navigate>
+                {{ __('Notes') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="/records" :active="request()->routeIs('records')" wire:navigate>
+                {{ __('Records') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="/events" :active="request()->routeIs('events')" wire:navigate>
+                {{ __('Events') }}
+            </x-responsive-nav-link>
             <div class="relative flex items-center">
                 <x-responsive-nav-link href="/notifications" :active="request()->routeIs('notifications')" wire:navigate class="border-x border-red-500">
                     {{ __('Notifications') }}
@@ -118,7 +143,9 @@ new class extends Component
                 <div class="absolute left-0 h-full w-1 bg-red-500"></div>
                 @endif
             </div>
-            
+            <x-responsive-nav-link href="/help" :active="request()->routeIs('help')" wire:navigate>
+                {{ __('Help') }}
+            </x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->

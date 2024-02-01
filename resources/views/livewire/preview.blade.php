@@ -43,8 +43,14 @@ $viewAll = function () {
 
 <div class="flex flex-col items-center border border-blue-400 rounded-lg h-56 my-3 px-4 pb-4 bg-inherit dark:text-gray-300 w-full lg:w-1/2 lg:h-48">
     <div class="flex items-center justify-between h-1/5 w-full dark:text-gray-300 bg-inherit">
-        <button wire:click="newItem" class="h-full pr-5 border-r-2 border-blue-400 rounded-xl ">New</button>
-        <div wire:click="viewAll" class="p-1 tracking-wider cursor-pointer">
+        <button wire:click="newItem"
+            class="h-full pr-5 border-r-2 border-blue-400 rounded-xl"
+        >
+            New
+        </button>
+        <div wire:click="viewAll"
+            class="p-1 tracking-wider cursor-pointer"
+        >
             {{ ucfirst($type) }}s
         </div>
         <div x-data="{ open: false }"
@@ -52,7 +58,11 @@ $viewAll = function () {
             @close.stop="open = false"
             class="relative h-full bg-inherit"
         >
-            <button @click="open = ! open" class="h-full pl-5 border-l-2 border-blue-400 rounded-xl">Sort</button>
+            <button @click="open = ! open"
+                class="h-full pl-5 border-l-2 border-blue-400 rounded-xl"
+            >
+                Sort
+            </button>
 
             <div x-show="open"
                 x-transition:enter="transition ease-out duration-200"

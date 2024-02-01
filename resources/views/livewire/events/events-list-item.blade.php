@@ -24,7 +24,7 @@ $toggleShowDay = function () {
 
 <div>
     <div wire:click="toggleShowDay"
-        class="text-xl text-center tracking-wider bg-blue-400 rounded-full my-3 cursor-row-resize dark:text-gray-900">
+        class="text-xl text-center tracking-wider bg-blue-400 rounded-full my-3 cursor-row-resize text-gray-900">
         {{ date('D j M y', strtotime($this->eventsThisDay[0]->start_date)) }}
     </div>
     @if($this->showDay)
