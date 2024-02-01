@@ -49,20 +49,61 @@ layout('layouts.app');
                     </span>
                         indicates unread notifications.
                 </div>
-                <div
-                    class="w-full"
-                >
-                    Creating
+                <div class="my-2">
+                    <span class="fa-solid fa-sliders text-xl text-blue-400 mr-1"></span>
+                    opens the control panel for the resource(s).
+                </div>
+                <div class="my-2">
+                    <span class="fa-solid fa-file-circle-plus text-xl text-blue-400"></span>
+                    <span class="fa-solid fa-folder-plus text-xl text-blue-400"></span>
+                    <span class="fa-regular fa-calendar-plus text-xl text-blue-400 mr-1"></span>
+                    creates a new resource.
+                </div>
+                <div class="my-2">
+                    <span class="fa-regular fa-trash-can text-xl text-red-500 mr-1"></span>
+                    deletes the resource.
+                </div>
+                <div class="my-2">
+                    <span class="fa-solid fa-user-xmark text-xl text-red-500 mr-1"></span>
+                    leaves a resource shared with you.
                 </div>
                 <div
-                    class="w-full"
+                    class="w-full my-2"
                 >
-                    Deleting
+                    <div class="text-lg tracking-wide font-medium">
+                        Creating
+                    </div>
+                    <div>
+                        New resources can be created from the Dashboard with the 'New' button and from each resource list page with the '+' icon to the right of the page title.
+                    </div>
                 </div>
                 <div
-                    class="w-full"
+                    class="w-full my-2"
                 >
-                    Sharing
+                    <div class="text-lg tracking-wide font-medium">
+                        Deleting
+                    </div>
+                    <div>
+                        When viewing a single resource,
+                        <br>
+                        if it is owned by you, the red trash can icon to the right of the resource title will delete the resource.
+                        <br>
+                        If the resource is shared with you, the red 'x' icon will leave the resource.
+                        <br>
+                        You will be prompted to confirm.
+                        <br>
+                        Delete and leave buttons can be hidden and shown from the control panel within each resource.
+                    </div>
+                </div>
+                <div
+                    class="w-full my-2"
+                >
+                    <div class="text-lg tracking-wide font-medium">
+                        Sharing
+                    </div>
+                    <div>
+                        
+                    </div>
                 </div>
             </div>
         </div>
