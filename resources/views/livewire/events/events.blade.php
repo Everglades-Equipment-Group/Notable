@@ -186,38 +186,33 @@ updated([
             <div class="">{{ $this->total }}</div>
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">View</div>
-            <div class="w-full flex justify-between items-center">
+            <div class="relative w-full flex justify-between items-center">
                 <button
                     wire:click="toggleView('calendar')"
-                    class="{{ $this->view == 'calendar' ? 'text-blue-400' : '' }} py-1"
+                    class="{{ $this->view == 'calendar' ? 'text-blue-400' : '' }} w-1/2 py-1 text-center"
                 >calendar</button>
-                <span>|</span>
+                <span class="absolute left-1/2 -translate-x-1/2 text-gray-500">|</span>
                 <button
                     wire:click="toggleView('list')"
-                    class="{{ $this->view == 'list' ? 'text-blue-400' : '' }} py-1"
+                    class="{{ $this->view == 'list' ? 'text-blue-400' : '' }} w-1/2 py-1 text-center"
                 >list</button>
-                <span>|</span>
-                <button
-                    wire:click="toggleView('schedule')"
-                    class="{{ $this->view == 'schedule' ? 'text-blue-400' : '' }} py-1"
-                >schedule</button>
             </div>
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Sorting</div>
-            <div class="w-full flex justify-between items-center">
+            <div class="relative w-full flex justify-between items-center">
                 <button
                     wire:click="sort('title')"
-                    class="py-1"
+                    class="w-1/2 text-center py-1"
                 >alphabetical
                     @if($this->sortBy == 'title')
                     <span class="fa-arrow-{{ $this->sortDirection == 'asc' ? 'down' : 'up' }}-long fa-solid pl-1 text-blue-400">
                     </span>
                     @endif
                 </button>
-                <span class="text-gray-500">|</span>
+                <span class="absolute left-1/2 -translate-x-1/2 text-gray-500">|</span>
                 <button
                     wire:click="sort('start_date')"
-                    class="py-1"
+                    class="w-1/2 text-center py-1"
                 >chronological
                     @if($this->sortBy == 'start_date')
                     <span class="fa-arrow-{{ $this->sortDirection == 'asc' ? 'down' : 'up' }}-long fa-solid pl-1 text-blue-400"> 

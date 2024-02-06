@@ -8,10 +8,10 @@ layout('layouts.app');
 
 <div class="flex flex-col items-center py-6 px-3 bg-inherit dark:text-gray-300">
     <h1 class="text-2xl tracking-wide">Help</h1>
-    <div class="w-full py-4">
-        <div x-data="{ openBasics: true }"
+    <div class="w-full py-4 bg-inherit">
+        <div x-data="{ openBasics: false }"
             @close.stop="open = false"
-            class="flex flex-col items-center w-full my-2"
+            class="flex flex-col items-center w-full my-2 bg-inherit"
         >
             <div @click="openBasics = !openBasics"
                 class="w-full text-center text-xl tracking-wide text-gray-900 bg-blue-400 rounded-full cursor-pointer"
@@ -19,7 +19,7 @@ layout('layouts.app');
                 Basics
             </div>
             <div x-show="openBasics"
-                class="flex flex-col text-left w-full p-2"
+                class="flex flex-col text-left w-full p-2 bg-inherit"
             >
                 <div class="my-2">Notes, Records, and Events are called "resources."</div>
                 <div class="my-2">
@@ -47,7 +47,7 @@ layout('layouts.app');
                         </svg>
                         <span class="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-500"></span>
                     </span>
-                        indicates unread notifications.
+                    indicates unread notifications.
                 </div>
                 <div class="my-2">
                     <span class="fa-solid fa-sliders text-xl text-blue-400 mr-1"></span>
@@ -67,21 +67,31 @@ layout('layouts.app');
                     <span class="fa-solid fa-user-xmark text-xl text-red-500 mr-1"></span>
                     leaves a resource shared with you.
                 </div>
+                <div class="my-2">
+                    <span class="fa-solid fa-info text-gray-700 text-xl mr-1"></span>
+                    shows/hides item info. color indicates item has no info.
+                </div>
+                <div class="my-2">
+                    <span class="fa-solid fa-info text-blue-400 text-xl mr-1"></span>
+                    shows/hides item info. color indicates item has info.
+                </div>
                 <div
-                    class="w-full my-2"
+                    class="flex flex-col items-center w-full my-2 bg-inherit"
                 >
-                    <div class="text-lg tracking-wide font-medium">
-                        Creating
+                    <hr class="w-full border-none h-px bg-gray-500 -mb-4 mt-6">
+                    <div class="px-2 text-lg tracking-wider font-medium text-center bg-inherit">
+                        Creating Resources
                     </div>
                     <div>
                         New resources can be created from the Dashboard with the 'New' button and from each resource list page with the '+' icon to the right of the page title.
                     </div>
                 </div>
                 <div
-                    class="w-full my-2"
+                    class="flex flex-col items-center w-full my-2 bg-inherit"
                 >
-                    <div class="text-lg tracking-wide font-medium">
-                        Deleting
+                    <hr class="w-full border-none h-px bg-gray-500 -mb-4 mt-6">
+                    <div class="px-2 text-lg tracking-wider font-medium text-center bg-inherit">
+                        Deleting Resources
                     </div>
                     <div>
                         When viewing a single resource,
@@ -92,17 +102,57 @@ layout('layouts.app');
                         <br>
                         You will be prompted to confirm.
                         <br>
-                        Delete and leave buttons can be hidden and shown from the control panel within each resource.
+                        Delete and leave buttons can be hidden and shown from the 'Settings' section in the control panel of each resource.
                     </div>
                 </div>
                 <div
-                    class="w-full my-2"
+                    class="flex flex-col items-center w-full my-2 bg-inherit"
                 >
-                    <div class="text-lg tracking-wide font-medium">
-                        Sharing
+                    <hr class="w-full border-none h-px bg-gray-500 -mb-4 mt-6">
+                    <div class="px-2 text-lg tracking-wider font-medium text-center bg-inherit">
+                        Sharing Resources
                     </div>
                     <div>
-                        
+                        In the 'Sharing' section of the control panel for each resource, add the username of the user you want to share with.
+                        <br>
+                        The users a resource is shared with are listed in the 'Sharing' section under 'With:'.
+                    </div>
+                    <div class="flex justify-between items-center w-full my-1">
+                        Username
+                        <div class="flex justify-between items-center border border-gray-700 rounded-full pl-1">
+                            <span class="fa-solid fa-shuffle text-sm text-gray-400 p-1" title="can sort"></span>
+                            <span class="fa-solid fa-check text-sm text-green-700 p-1" title="can check"></span>
+                            <span class="fa-solid fa-plus text-sm text-blue-500 p-1" title="can add"></span>
+                            <span class="fa-solid fa-scissors text-sm text-yellow-600 p-1" title="can edit"></span>
+                            <span class="fa-solid fa-trash text-sm text-red-600 p-1" title="can delete"></span>
+                            <span class="fa-solid fa-user-plus text-sm text-blue-500 p-1" title="can share"></span>
+                            <span class="fa-solid fa-key text-blue-400 p-1 ml-1 border border-gray-700 rounded-full" title="access pannel"></span>
+                        </div>
+                    </div>
+                    <div>
+                        If you own the resource, the permissions each user has for it are indicated to the right of their username. This is called the access panel. Opening the access panel allows you to adjust their permissions.
+                    </div>
+                    <div class="w-full my-1">
+                        <span class="fa-solid fa-shuffle text-sm text-gray-400 p-1" title="can sort"></span>
+                        can sort note items
+                        <br>
+                        <span class="fa-solid fa-check text-sm text-green-700 p-1" title="can check"></span>
+                        can check note items
+                        <br>
+                        <span class="fa-solid fa-plus text-sm text-blue-500 p-1" title="can add"></span>
+                        can add note items or record entries
+                        <br>
+                        <span class="fa-solid fa-scissors text-sm text-yellow-600 p-1" title="can edit"></span>
+                        can edit the resource
+                        <br>
+                        <span class="fa-solid fa-trash text-sm text-red-600 p-1" title="can delete"></span>
+                        can delete note items and record entries
+                        <br>
+                        <span class="fa-solid fa-user-plus text-sm text-blue-500 p-1" title="can share"></span>
+                        can share the resource with others
+                        <br>
+                        <span class="fa-solid fa-key text-sm text-blue-400 p-1" title="access pannel"></span>
+                        the access panel icon
                     </div>
                 </div>
             </div>
@@ -163,12 +213,22 @@ layout('layouts.app');
             <div x-show="openNotes"
                 class="flex flex-col text-left w-full p-2"
             >
-                
+                <div cass="my-2">
+                    <div>
+
+                    </div>
+                </div>
+                <div cass="my-2">
+
+                </div>
+                <div cass="my-2">
+
+                </div>
             </div>
         </div>
         <div x-data="{ openRecords: false }"
             @close.stop="open = false"
-            class="flex flex-col items-center w-full my-2"
+            class="flex flex-col items-center w-full my-2 bg-inherit"
         >
             <div @click="openRecords = !openRecords"
                 class="w-full text-center text-xl tracking-wide text-gray-900 bg-blue-400 rounded-full cursor-pointer"
@@ -181,9 +241,9 @@ layout('layouts.app');
 
             </div>
         </div>
-        <div x-data="{ openEvents: false }"
+        <div x-data="{ openEvents: true }"
             @close.stop="open = false"
-            class="flex flex-col items-center w-full my-2"
+            class="flex flex-col items-center w-full my-2 bg-inherit"
         >
             <div @click="openEvents = !openEvents"
                 class="w-full text-center text-xl tracking-wide text-gray-900 bg-blue-400 rounded-full cursor-pointer"
@@ -191,9 +251,85 @@ layout('layouts.app');
                 Events
             </div>
             <div x-show="openEvents"
-                class="flex flex-col text-left w-full p-2"
+                class="flex flex-col w-full p-2 bg-inherit"
             >
-
+                <div class="flex flex-col items-center my-2 bg-inherit">
+                    <hr class="w-full border-none h-px bg-gray-500 -mb-4 mt-6">
+                    <div class="px-2 text-lg tracking-wider font-medium text-center bg-inherit">
+                        Events List Page
+                    </div>
+                    <div class="w-full mt-2">
+                        Opens in calendar view on the present day.
+                    </div>
+                    <div class="flex justify-evenly items-center w-3/4 m-2">
+                        <div class="fa-solid fa-angle-left text-blue-400"></div>
+                        <div class="fa-solid fa-angles-left text-blue-400"></div>
+                        <div class="w-3/5 tracking-wider text-center text-lg font-medium">Month Year</div>
+                        <div class="fa-solid fa-angles-right text-blue-400"></div>
+                        <div class="fa-solid fa-angle-right text-blue-400"></div>
+                    </div>
+                    <div class="w-full">
+                        <span class="fa-solid fa-angle-left text-blue-400 mr-1"></span>
+                        previous month
+                        <br>
+                        <span class="fa-solid fa-angles-left text-blue-400 mr-1"></span>
+                        previous year
+                        <br>
+                        <span class="w-3/5 tracking-wider text-center text-lg font-medium mr-1">'Month Year'</span>
+                        scroll to specific month and year
+                        <br>
+                        <span class="fa-solid fa-angles-right text-blue-400 mr-1"></span>
+                        next year
+                        <br>
+                        <span class="fa-solid fa-angle-right text-blue-400 mr-1"></span>
+                        next month
+                    </div>
+                    <div class="mt-2">
+                        The selected day on the calendar is displayed larger without a border. The present day will be selected when opening the page. Selecting another day will display that day's events in the list below the calendar.
+                    </div>
+                    <div class="w-full my-1">
+                        <div class="my-1">
+                            <span class="inline-flex flex-col items-center justify-center h-7 w-7 bg-blue-400 text-gray-900 rounded-full mr-2">#</span>
+                            a solid blue day has events.
+                        </div>
+                        <div class="my-1">
+                            <span class="inline-flex flex-col items-center justify-center h-7 w-7 border border-gray-500 rounded-full mr-2">#</span>
+                            a transparent day has no events.
+                        </div>
+                    </div>
+                    <div class="flex justify-evenly items-center w-full my-1">
+                        <div class="fa-solid fa-magnifying-glass text-lg text-blue-400"></div>
+                        <div class="tracking-wider text-lg font-medium">
+                            Week Day
+                            <span class="inline-block"> </span>
+                            Month Day
+                        </div>
+                        <div class="fa-solid fa-location-crosshairs text-lg text-blue-400"></div>
+                    </div>
+                    <div class="w-full my-1">
+                        <span class="fa-solid fa-magnifying-glass text-blue-400 mr-1"></span>
+                        opens the event search bar
+                        <br>
+                        <span class="tracking-wider font-medium mr-1">
+                            'Week Day
+                            <span class="inline-block"> </span>
+                            Month Day'
+                        </span>
+                        the selected day
+                        <br>
+                        <span class="fa-solid fa-location-crosshairs text-blue-400 mr-1"></span>
+                        returns to the present day
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+                <div class="flex flex-col items-center my-2 bg-inherit">
+                    <hr class="w-full border-none h-px bg-gray-500 -mb-4 mt-6">
+                    <div class="px-2 text-lg tracking-wider font-medium text-center bg-inherit">
+                        Event View Page
+                    </div>
+                </div>
             </div>
         </div>
     </div>

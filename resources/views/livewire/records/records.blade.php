@@ -94,20 +94,20 @@ $sort = function ($sortBy) {
             <div class="">{{ $this->total }}</div>
             <hr class="w-full border-none h-px bg-gray-500 -mb-6 mt-6">
             <div class="w-fit px-2 text-center text-lg tracking-wider m-2 bg-inherit">Sorting</div>
-            <div class="w-full flex justify-between items-center">
+            <div class="relative w-full flex justify-between items-center">
                 <button
                     wire:click="sort('title')"
-                    class="py-1"
+                    class="w-1/2 text-center py-1"
                 >alphabetical
                     @if($this->sortBy == 'title')
                     <span class="fa-arrow-{{ $this->sortDirection == 'asc' ? 'down' : 'up' }}-long fa-solid pl-1 text-blue-400">
                     </span>
                     @endif
                 </button>
-                <span class="text-gray-500">|</span>
+                <span class="absolute left-1/2 -translate-x-1/2 text-gray-500">|</span>
                 <button
                     wire:click="sort('created_at')"
-                    class="py-1"
+                    class="w-1/2 text-center py-1"
                 >chronological
                     @if($this->sortBy == 'created_at')
                     <span class="fa-arrow-{{ $this->sortDirection == 'asc' ? 'down' : 'up' }}-long fa-solid pl-1 text-blue-400"> 
