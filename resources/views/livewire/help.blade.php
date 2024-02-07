@@ -4,12 +4,20 @@ use function Livewire\Volt\{state, layout, mount, on};
 
 layout('layouts.app');
 
+state([
+    'previousPage' => '',
+]);
+
+mount(function () {
+    $this->previousPage = app('router')->getRoutes()->match(app('request')->create(url()->previous()))->getName();
+});
+
 ?>
 
 <div class="flex flex-col items-center py-6 px-3 bg-inherit dark:text-gray-300">
     <h1 class="text-2xl tracking-wide">Help</h1>
     <div class="w-full py-4 bg-inherit">
-        <div x-data="{ openBasics: false }"
+        <div x-data="{ openBasics: $wire.previousPage === null }"
             @close.stop="open = false"
             class="flex flex-col items-center w-full my-2 bg-inherit"
         >
@@ -134,30 +142,30 @@ layout('layouts.app');
                     </div>
                     <div class="w-full my-1">
                         <span class="fa-solid fa-shuffle text-sm text-gray-400 p-1" title="can sort"></span>
-                        can sort note items
+                        can sort note items.
                         <br>
                         <span class="fa-solid fa-check text-sm text-green-700 p-1" title="can check"></span>
-                        can check note items
+                        can check note items.
                         <br>
                         <span class="fa-solid fa-plus text-sm text-blue-500 p-1" title="can add"></span>
-                        can add note items or record entries
+                        can add note items or record entries.
                         <br>
                         <span class="fa-solid fa-scissors text-sm text-yellow-600 p-1" title="can edit"></span>
-                        can edit the resource
+                        can edit the resource.
                         <br>
                         <span class="fa-solid fa-trash text-sm text-red-600 p-1" title="can delete"></span>
-                        can delete note items and record entries
+                        can delete note items and record entries.
                         <br>
                         <span class="fa-solid fa-user-plus text-sm text-blue-500 p-1" title="can share"></span>
-                        can share the resource with others
+                        can share the resource with others.
                         <br>
                         <span class="fa-solid fa-key text-sm text-blue-400 p-1" title="access pannel"></span>
-                        the access panel icon
+                        the access panel icon.
                     </div>
                 </div>
             </div>
         </div>
-        <div x-data="{ openDashboard: false }"
+        <div x-data="{ openDashboard: $wire.previousPage === 'dashboard' }"
             @close.stop="open = false"
             class="flex flex-col items-center w-full my-2"
         >
@@ -201,7 +209,7 @@ layout('layouts.app');
                 </div>
             </div>
         </div>
-        <div x-data="{ openNotes: false }"
+        <div x-data="{ openNotes: $wire.previousPage === 'notes' }"
             @close.stop="open = false"
             class="flex flex-col items-center w-full my-2"
         >
@@ -226,7 +234,7 @@ layout('layouts.app');
                 </div>
             </div>
         </div>
-        <div x-data="{ openRecords: false }"
+        <div x-data="{ openRecords: $wire.previousPage === 'records' }"
             @close.stop="open = false"
             class="flex flex-col items-center w-full my-2 bg-inherit"
         >
@@ -241,7 +249,7 @@ layout('layouts.app');
 
             </div>
         </div>
-        <div x-data="{ openEvents: true }"
+        <div x-data="{ openEvents: $wire.previousPage === 'events' }"
             @close.stop="open = false"
             class="flex flex-col items-center w-full my-2 bg-inherit"
         >
@@ -270,22 +278,22 @@ layout('layouts.app');
                     </div>
                     <div class="w-full">
                         <span class="fa-solid fa-angle-left text-blue-400 mr-1"></span>
-                        previous month
+                        previous month.
                         <br>
                         <span class="fa-solid fa-angles-left text-blue-400 mr-1"></span>
-                        previous year
+                        previous year.
                         <br>
                         <span class="w-3/5 tracking-wider text-center text-lg font-medium mr-1">'Month Year'</span>
-                        scroll to specific month and year
+                        scroll to specific month and year.
                         <br>
                         <span class="fa-solid fa-angles-right text-blue-400 mr-1"></span>
-                        next year
+                        next year.
                         <br>
                         <span class="fa-solid fa-angle-right text-blue-400 mr-1"></span>
-                        next month
+                        next month.
                     </div>
                     <div class="mt-2">
-                        The selected day on the calendar is displayed larger without a border. The present day will be selected when opening the page. Selecting another day will display that day's events in the list below the calendar.
+                        The selected day on the calendar is displayed larger and without a border. The present day will be selected when opening the page. Selecting another day will display that day's events in the list below the calendar.
                     </div>
                     <div class="w-full my-1">
                         <div class="my-1">
@@ -306,28 +314,127 @@ layout('layouts.app');
                         </div>
                         <div class="fa-solid fa-location-crosshairs text-lg text-blue-400"></div>
                     </div>
-                    <div class="w-full my-1">
+                    <div class="w-full my-2">
                         <span class="fa-solid fa-magnifying-glass text-blue-400 mr-1"></span>
-                        opens the event search bar
+                        opens the event search bar.
                         <br>
                         <span class="tracking-wider font-medium mr-1">
                             'Week Day
                             <span class="inline-block"> </span>
                             Month Day'
                         </span>
-                        the selected day
+                        the selected day.
                         <br>
                         <span class="fa-solid fa-location-crosshairs text-blue-400 mr-1"></span>
-                        returns to the present day
+                        returns to the present day.
                     </div>
                     <div>
-                        
+                        If the selected day has events, they will be listed below the calendar. The title, start and end times, and the 'shared' symbol, if applicable,will be displayed for each event. Each is a link to view that event.
                     </div>
                 </div>
-                <div class="flex flex-col items-center my-2 bg-inherit">
+                <div class="flex flex-col items-center w-full my-2 bg-inherit">
                     <hr class="w-full border-none h-px bg-gray-500 -mb-4 mt-6">
                     <div class="px-2 text-lg tracking-wider font-medium text-center bg-inherit">
                         Event View Page
+                    </div>
+                    <div class="flex justify-evenly items-center w-full my-2">
+                        <div class="fa-regular fa-calendar-days text-lg text-blue-400"></div>
+                        <div class="fa-solid fa-calendar-day text-lg text-blue-400"></div>
+                        <div class="fa-regular fa-calendar-plus text-lg text-blue-400"></div>
+                    </div>
+                    <div class="w-full">
+                        <span class="fa-regular fa-calendar-days text-blue-400 mr-1"></span>
+                        navigates to the events list page.
+                        <br>
+                        <span class="fa-solid fa-calendar-day text-blue-400 mr-1"></span>
+                        navigates to the events list page, with the current event's day selected.
+                        <br>
+                        <span class="fa-regular fa-calendar-plus text-blue-400 mr-1"></span>
+                        creates a new event and navigates to it.
+                    </div>
+                    <div class="flex justify-evenly items-center w-full my-2">
+                        <div class="flex flex-col justify-between items-center">
+                            <div class="tracking-wide text-lg">Start</div>
+                            <div>
+                                mm/dd/yyyy
+                                <span class="fa-regular fa-calendar text-blue-400 ml-2"></span>
+                            </div>
+                            <div>
+                                --:-- --
+                                <span class="fa-regular fa-clock text-blue-400 ml-2"></span>
+                            </div>
+                            <div class="px-2 py-1 mt-1 border border-blue-400 text-blue-400 rounded-md shadow-sm">
+                                every
+                            </div>
+                        </div>
+                        <div class="flex flex-col justify-between items-center">
+                            <div class="tracking-wide text-lg">End</div>
+                            <div>
+                                mm/dd/yyyy
+                                <span class="fa-regular fa-calendar text-blue-400 ml-2"></span>
+                            </div>
+                            <div>
+                                --:-- --
+                                <span class="fa-regular fa-clock text-blue-400 ml-2"></span>
+                            </div>
+                            <div class="px-2 py-1 mt-1 border border-blue-400 text-blue-400 rounded-md shadow-sm">
+                                all day
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full my-2">
+                        <span class="mr-1">mm/dd/yyyy</span>
+                        is the date format.
+                        <br>
+                        The date can be typed here.
+                        <br>
+                        New events will default to the present day.
+                        <br>
+                        <span class="fa-regular fa-calendar text-blue-400 mr-1"></span>
+                        opens the date selector.
+                        <br>
+                        <span class="mr-1">--:-- --</span>
+                        the time can be typed here.
+                        <br>
+                        <span class="fa-regular fa-clock text-blue-400 mr-1"></span>
+                        opens the time selector.
+                        <br>
+                        <span class="inline-block mt-1 py-1 px-2 border border-blue-400 text-blue-400 text-sm rounded-md shadow-sm mr-1">every</span>
+                        opens event recursion options.
+                        <br>
+                        If recursion is active, the button will be blue.
+                    </div>
+                    <div class="flex items-center rounded-lg my-2 border border-blue-400 overflow-hidden bg-inherit">
+                        <div class="w-12 border-none text-center">
+                            1
+                        </div>
+                        @foreach(['minute', 'hour', 'day', 'week', 'month'] as $every)
+                        <div
+                            wire:key="every-{{ $every }}"
+                            class="border-l border-blue-400 text-blue-400 py-2 px-3"
+                        >
+                            {{ $every }}
+                        </div>
+                        @endforeach
+                    </div>
+                    <div class="my-1">
+                        These are the event recursion options.
+                        <br>
+                        The number on the left is the frequency for one of the intervals to the right. The selected interval will be blue.
+                        <br>
+                        <span class="tracking-widest font-medium text-xs">EXAMPLES:</span>
+                        <br>
+                        Every 1 month.
+                        <br>
+                        Every 3 weeks.
+                        <br>
+                        Every 36 hours.
+                    </div>
+                    <div class="w-full my-1">
+                        <span class="inline-block mt-1 py-1 px-2 border border-blue-400 text-blue-400 text-sm rounded-md shadow-sm mr-1">all day</span>
+                        sets event duration to all day.
+                        <br>
+                        The button will be blue if active.
                     </div>
                 </div>
             </div>
