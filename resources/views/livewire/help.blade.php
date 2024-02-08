@@ -16,7 +16,7 @@ mount(function () {
 
 <div class="flex flex-col items-center py-6 px-3 bg-inherit dark:text-gray-300">
     <h1 class="text-2xl tracking-wide">Help</h1>
-    <div class="w-full py-4 bg-inherit">
+    <div class="w-full py-4 bg-inherit lg:w-1/2">
         <div x-data="{ openBasics: $wire.previousPage === null || $wire.previousPage === 'notifications' }"
             @close.stop="open = false"
             class="flex flex-col items-center w-full my-2 bg-inherit"
@@ -109,7 +109,7 @@ mount(function () {
                     <div class="px-2 text-lg tracking-wider font-medium text-center bg-inherit">
                         Deleting Resources
                     </div>
-                    <div>
+                    <div class="w-full">
                         When viewing a single resource,
                         <br>
                         if it is owned by you, the red trash can icon to the right of the resource title will delete the resource.
@@ -128,7 +128,7 @@ mount(function () {
                     <div class="px-2 text-lg tracking-wider font-medium text-center bg-inherit">
                         Sharing Resources
                     </div>
-                    <div>
+                    <div class="w-full">
                         In the 'Sharing' section of the control panel for each resource, add the username of the user you want to share with.
                         <br>
                         The users a resource is shared with are listed in the 'Sharing' section under 'With:'.
@@ -269,7 +269,7 @@ mount(function () {
             <div x-show="openRecords"
                 class="flex flex-col text-left w-full p-2 bg-inherit"
             >
-                <div class="flex flex-col items-center mt-2 bg-inherit">
+                <div class="w-full mt-2 bg-inherit">
                     Below the title and info is a summary of the record;
                     <br>
                     Total, units, "of", and what is being measured.
@@ -295,7 +295,7 @@ mount(function () {
                     <div class="px-2 text-lg tracking-wider font-medium text-center bg-inherit">
                         Entries
                     </div>
-                    <div class="mt-1">
+                    <div class="w-full mt-1">
                         New entries can be input below the summary, where it says '<span class="font-medium tracking-wide drop-shadow-[1px_1px_0px_rgba(96,165,250,1)]">new entry</span>'.
                         <br>
                         The 'new entry' input can be moved to the bottom of the entries list in the control panel via '<span class="font-medium tracking-wide drop-shadow-[1px_1px_0px_rgba(96,165,250,1)]">input at bottom</span>'.
@@ -314,7 +314,7 @@ mount(function () {
                     <div class="px-2 text-lg tracking-wider font-medium text-center bg-inherit">
                         Charting
                     </div>
-                    <div>
+                    <div class="w-full">
                         Entries are displayed in a chart at the bottom of the page.
                         <br>
                         The chart's type and x-axis can be changed from the 'Charting' section of the control panel.
@@ -497,7 +497,7 @@ mount(function () {
                         </div>
                         @endforeach
                     </div>
-                    <div class="my-1">
+                    <div class="w-full my-1">
                         These are the event recursion options.
                         <br>
                         The number on the left is the frequency for one of the intervals to the right. The selected interval will be blue.
