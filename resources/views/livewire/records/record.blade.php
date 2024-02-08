@@ -383,7 +383,7 @@ updated([
             <div class="w-full flex justify-between items-center">
                 <button
                     wire:click="sort('created_at')"
-                    class="py-1"
+                    class="w-1/2 text-center py-1"
                 >chronological
                     @if($this->sortBy == 'created_at')
                     <span class="fa-arrow-{{ $this->sortDirection == 'asc' ? 'down' : 'up' }}-long fa-solid pl-1 text-blue-400"> 
@@ -392,7 +392,7 @@ updated([
                 </button>
                 |<button
                     wire:click="sort('amount')"
-                    class="py-1"
+                    class="w-1/2 text-center py-1"
                 >volumetric
                     @if($this->sortBy == 'amount')
                     <span class="fa-arrow-{{ $this->sortDirection == 'asc' ? 'down' : 'up' }}-long fa-solid pl-1 text-blue-400"> 

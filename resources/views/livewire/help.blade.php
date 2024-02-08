@@ -17,7 +17,7 @@ mount(function () {
 <div class="flex flex-col items-center py-6 px-3 bg-inherit dark:text-gray-300">
     <h1 class="text-2xl tracking-wide">Help</h1>
     <div class="w-full py-4 bg-inherit">
-        <div x-data="{ openBasics: $wire.previousPage === null }"
+        <div x-data="{ openBasics: $wire.previousPage === null || $wire.previousPage === 'notifications' }"
             @close.stop="open = false"
             class="flex flex-col items-center w-full my-2 bg-inherit"
         >
@@ -74,6 +74,14 @@ mount(function () {
                 <div class="my-2">
                     <span class="fa-solid fa-user-xmark text-xl text-red-500 mr-1"></span>
                     leaves a resource shared with you.
+                </div>
+                <div class="my-2">
+                    <span class="fa-regular fa-clock text-blue-400 mr-1"></span>
+                    time selector.
+                </div>
+                <div class="my-2">
+                    <span class="fa-regular fa-calendar text-blue-400 mr-1"></span>
+                    date selector.
                 </div>
                 <div class="my-2">
                     <span class="fa-solid fa-info text-gray-700 text-xl mr-1"></span>
@@ -221,16 +229,31 @@ mount(function () {
             <div x-show="openNotes"
                 class="flex flex-col text-left w-full p-2"
             >
-                <div cass="my-2">
-                    <div>
-
-                    </div>
+                <div  class="w-full mt-2 bg-inherit">
+                    New items can be input below the note's info box, where it says '<span class="font-medium tracking-wide drop-shadow-[1px_1px_0px_rgba(96,165,250,1)]">new item</span>'.
+                    <br>
+                    The 'new item' input can be moved to the bottom of the items list in the control panel via '<span class="font-medium tracking-wide drop-shadow-[1px_1px_0px_rgba(96,165,250,1)]">input at bottom</span>'.
                 </div>
-                <div cass="my-2">
-
+                <div class="flex items-center mt-2">
+                    <span class="inline-block h-5 w-5 border border-gray-600 rounded-full mr-2"></span>
+                    an item's check box.
                 </div>
-                <div cass="my-2">
-
+                <div  class="flex items-center my-2">
+                    <span class="inline-block h-5 w-5 border border-green-800 bg-green-800 rounded-full mr-2"></span>
+                    indicates checked.
+                </div>
+                <div>
+                    Check boxes can be hidden and shown from the 'Settings' section in the control panel.
+                    <br>
+                    Items can be automatically moved to the bottom of the list when checked via '<span class="font-medium tracking-wide drop-shadow-[1px_1px_0px_rgba(96,165,250,1)]">move checked to bottom</span>' in the 'Settings' section of the control panel.
+                    <br>
+                    When 'move checked to bottom' is active, checked items can be restored to their original positions via '<span class="font-medium tracking-wide drop-shadow-[1px_1px_0px_rgba(96,165,250,1)]">leave checked in place</span>' in the 'Settings' section of the control panel.
+                </div>
+                <div class="my-2">
+                    <span class="fa-solid fa-arrows-up-down mr-2 dark:text-gray-600"></span>
+                    the item's handle for drag & drop sorting.
+                    <br>
+                    Sort by '<span class="font-medium tracking-wide drop-shadow-[1px_1px_0px_rgba(96,165,250,1)]">Draggable</span>' in the 'Sorting' section of the control panel.
                 </div>
             </div>
         </div>
@@ -244,9 +267,66 @@ mount(function () {
                 Records
             </div>
             <div x-show="openRecords"
-                class="flex flex-col text-left w-full p-2"
+                class="flex flex-col text-left w-full p-2 bg-inherit"
             >
-
+                <div class="flex flex-col items-center mt-2 bg-inherit">
+                    Below the title and info is a summary of the record;
+                    <br>
+                    Total, units, "of", and what is being measured.
+                    <br>
+                    'units' is where you enter the units of measurement for the record.
+                    <br>
+                    EX: oz, ounces, minutes, bottles, etc.
+                    <br>
+                    'measuring' is where you enter what is being measured.
+                    <br>
+                    EX: water, running, beer on the wall, etc.
+                    <br>
+                    'from' the date and time of the first entry.
+                    <br>
+                    'to' the date and time of the last entry.
+                    <br>
+                    The 'from' and 'to' dates can be changed to view and chart only entries from that date range.
+                    <br>
+                    These can be hidden and shown from the 'Settings' section in the control panel.
+                </div>
+                <div class="flex flex-col items-center mt-2 bg-inherit">
+                    <hr class="w-full border-none h-px bg-gray-500 -mb-4 mt-6">
+                    <div class="px-2 text-lg tracking-wider font-medium text-center bg-inherit">
+                        Entries
+                    </div>
+                    <div class="mt-1">
+                        New entries can be input below the summary, where it says '<span class="font-medium tracking-wide drop-shadow-[1px_1px_0px_rgba(96,165,250,1)]">new entry</span>'.
+                        <br>
+                        The 'new entry' input can be moved to the bottom of the entries list in the control panel via '<span class="font-medium tracking-wide drop-shadow-[1px_1px_0px_rgba(96,165,250,1)]">input at bottom</span>'.
+                        <br>
+                        New entries will default to the present date and time.
+                        <br>
+                        The date and time can be edited where they are displayed, by typing over it or using the selector.
+                        <br>
+                        The date, time, and units can be hidden and shown from the 'Settings' section in the control panel.
+                        <br>
+                        The value of an existing entry can be edited by typing over it.
+                    </div>
+                </div>
+                <div class="flex flex-col items-center my-2 bg-inherit">
+                    <hr class="w-full border-none h-px bg-gray-500 -mb-4 mt-6">
+                    <div class="px-2 text-lg tracking-wider font-medium text-center bg-inherit">
+                        Charting
+                    </div>
+                    <div>
+                        Entries are displayed in a chart at the bottom of the page.
+                        <br>
+                        The chart's type and x-axis can be changed from the 'Charting' section of the control panel.
+                        <br>
+                        <span class="inline-block p-1 m-1 ml-0 border border-slate-600 rounded-md shadow-lg">
+                            compare records
+                        </span>
+                        select another record to display on the chart with the current one(s).
+                        <br>
+                        Multiple records can be charted at once.
+                    </div>
+                </div>
             </div>
         </div>
         <div x-data="{ openEvents: $wire.previousPage === 'events' }"
@@ -283,7 +363,7 @@ mount(function () {
                         <span class="fa-solid fa-angles-left text-blue-400 mr-1"></span>
                         previous year.
                         <br>
-                        <span class="w-3/5 tracking-wider text-center text-lg font-medium mr-1">'Month Year'</span>
+                        <span class="w-3/5 tracking-wider text-center text-lg font-medium mr-1 drop-shadow-[1px_1px_0px_rgba(96,165,250,1)]">'Month Year'</span>
                         scroll to specific month and year.
                         <br>
                         <span class="fa-solid fa-angles-right text-blue-400 mr-1"></span>
@@ -318,7 +398,7 @@ mount(function () {
                         <span class="fa-solid fa-magnifying-glass text-blue-400 mr-1"></span>
                         opens the event search bar.
                         <br>
-                        <span class="tracking-wider font-medium mr-1">
+                        <span class="tracking-wider font-medium mr-1 drop-shadow-[1px_1px_0px_rgba(96,165,250,1)]">
                             'Week Day
                             <span class="inline-block"> </span>
                             Month Day'
@@ -329,7 +409,7 @@ mount(function () {
                         returns to the present day.
                     </div>
                     <div>
-                        If the selected day has events, they will be listed below the calendar. The title, start and end times, and the 'shared' symbol, if applicable,will be displayed for each event. Each is a link to view that event.
+                        If the selected day has events, they will be listed below the calendar. The title, start and end times, and the 'shared' symbol, if applicable, will be displayed for each event. Each is a link to view that event.
                     </div>
                 </div>
                 <div class="flex flex-col items-center w-full my-2 bg-inherit">
@@ -383,7 +463,7 @@ mount(function () {
                         </div>
                     </div>
                     <div class="w-full my-2">
-                        <span class="mr-1">mm/dd/yyyy</span>
+                        <span class="mr-1 font-medium tracking-wide drop-shadow-[1px_1px_0px_rgba(96,165,250,1)]">mm/dd/yyyy</span>
                         is the date format.
                         <br>
                         The date can be typed here.
@@ -393,7 +473,7 @@ mount(function () {
                         <span class="fa-regular fa-calendar text-blue-400 mr-1"></span>
                         opens the date selector.
                         <br>
-                        <span class="mr-1">--:-- --</span>
+                        <span class="mr-1 font-medium tracking-wide drop-shadow-[1px_1px_0px_rgba(96,165,250,1)]">--:-- --</span>
                         the time can be typed here.
                         <br>
                         <span class="fa-regular fa-clock text-blue-400 mr-1"></span>
