@@ -17,6 +17,14 @@ class Chart extends Component
     {
         // return <<<'JS'
         $this->js('
+        
+            let textColor;
+            if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                textColor = "white";
+            } else {
+                textColor = "black";
+            };
+
             let data = [];
             if (Object.entries($wire.chartData)[0][1]["data"]) {
                 Object.entries($wire.chartData).forEach((item, i) => {
@@ -41,15 +49,15 @@ class Chart extends Component
                 backgroundColor: "transparent",
                 legend:{
                     fontSize: 15,
-                    fontColor: "white"      
+                    fontColor: textColor,    
                 },
                 axisX:{
-                    labelFontColor: "white",
+                    labelFontColor: textColor,
                     labelFontSize: 12,
                     valueFormatString: $wire.xAxisFormat,
                 },
                 axisY:{
-                    labelFontColor: "white",
+                    labelFontColor: textColor,
                     labelFontSize: 14,
                 },
                 data: data        

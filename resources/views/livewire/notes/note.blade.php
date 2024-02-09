@@ -60,6 +60,8 @@ $getItems = function () {
                         ->when($this->moveChecked, fn ($query) => $query->orderBy('checked'))
                         ->orderBy($this->sortBy, $this->sortDirection)
                         ->get();
+
+        $this->total = $this->note->items()->count();
     }
 };
 
