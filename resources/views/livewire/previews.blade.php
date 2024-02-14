@@ -44,7 +44,19 @@ $test = function () {
 ?>
 
 <div class="flex flex-col items-center p-5 h-max bg-inherit">
-    <livewire:preview type="note" :data="$this->nullIfEmpty($notes)" wire:key="{{$this->notes->first()->id}}"/>
-    <livewire:preview type="record" :data="$this->nullIfEmpty($records)" wire:key="{{$this->records->first()->id}}"/>
-    <livewire:preview type="event" :data="$this->nullIfEmpty($events)" wire:key="{{$this->events->first()->id}}"/>
+    <livewire:preview
+        type="note"
+        :data="$this->nullIfEmpty($notes)"
+        wire:key="{{ $this->notes->first() ? $this->notes->first()->id : '' }}"
+    />
+    <livewire:preview
+        type="record"
+        :data="$this->nullIfEmpty($records)"
+        wire:key="{{ $this->records->first() ? $this->records->first()->id : '' }}"
+    />
+    <livewire:preview
+        type="event"
+        :data="$this->nullIfEmpty($events)"
+        wire:key="{{$this->events->first() ? $this->events->first()->id : '' }}"
+    />
 </div>

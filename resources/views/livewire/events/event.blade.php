@@ -81,7 +81,7 @@ mount(function () {
 });
 
 $notify = function ($event) {
-    if ($this->isShared) {
+    // if ($this->isShared) {
         foreach($this->event->users()->where('user_id', '!=', auth()->user()->id)->get() as $user) {
             $user->notifications()->create([
                 'from_id' => auth()->user()->id,
@@ -90,7 +90,7 @@ $notify = function ($event) {
                 'resource_id' => $this->event->id,
             ]);
         };
-    };
+    // };
 };
 
 $viewAll = function () {

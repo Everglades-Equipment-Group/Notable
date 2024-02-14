@@ -1,23 +1,13 @@
-<?php
-
-// make modal
-
-use function Livewire\Volt\{state, layout, mount, on};
-
-layout('layouts.app');
-
-state([
-    'previousPage' => '',
-]);
-
-mount(function () {
-    $this->previousPage = app('router')->getRoutes()->match(app('request')->create(url()->previous()))->getName();
-});
-
-?>
-
-<div class="flex flex-col items-center py-6 px-3 bg-inherit dark:text-gray-300">
-    <h1 class="text-2xl tracking-wide">Help</h1>
+<div class="flex flex-col items-center mt-10 py-6 px-3 dark:bg-slate-900 dark:text-gray-300">
+    <div class="relative flex justify-center items-center w-full">
+        <h1 class="text-center text-2xl tracking-wide">Help</h1>
+        <button
+            wire:click="$dispatch('closeModal')"
+            class="absolute right-2 text-xl text-red-500 font-medium cursor-pointer"
+        >
+            X
+        </button>
+    </div>
     <div class="w-full py-4 bg-inherit lg:w-1/2">
         <div x-data="{ openBasics: $wire.previousPage === null || $wire.previousPage === 'notifications' }"
             @close.stop="open = false"

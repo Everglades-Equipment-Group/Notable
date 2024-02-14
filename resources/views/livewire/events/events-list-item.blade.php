@@ -36,15 +36,7 @@ $toggleShowDay = function () {
             <div class="flex w-3/5">
                 <div class="">{{ $event->title }}</div>
                 @if($event->users->count() > 1)
-                <div class="flex pl-2 text-red-500">
-                    @if($event->user_id == auth()->user()->id)
-                        <span class="pt-px">&</span>
-                        <span class="fa-solid fa-angle-right text-blue-400 pt-1"></span>
-                    @else
-                        <span class="fa-solid fa-angle-left text-blue-400"></span>
-                        <span>&</span>
-                    @endif
-                </div>
+                <x-shared-symbol :direction="$event->user_id == $this->user->id" />
                 @endif
             </div>
             <div class="">

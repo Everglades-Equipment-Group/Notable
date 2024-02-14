@@ -33,13 +33,7 @@ $toggleInfo = function () {
         >{{ $this->note->title }}</div>
         <div>
             @if($this->note->users->count() > 1)
-            <span class="text-center pr-1 text-red-500">
-                @if($this->note->user_id == $this->user->id)
-                    &<i class="fa-solid fa-angle-right text-blue-400"></i>
-                @else
-                    <i class="fa-solid fa-angle-left text-blue-400"></i>&
-                @endif
-            </span>
+            <x-shared-symbol :direction="$this->note->user_id == $this->user->id" />
             @endif
             <button
                 wire:click="toggleInfo"

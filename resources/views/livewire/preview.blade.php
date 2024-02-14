@@ -2,8 +2,9 @@
 
 use function Livewire\Volt\{state};
 
-state(['data']);
 state([
+    'data',
+    'user' => auth()->user(),
     'type' => '',
     'id' => 0,
     'sortBy' => '',
@@ -94,13 +95,7 @@ $viewAll = function () {
                 </span>
                 <div>
                     @if($item->users->count() > 1)
-                    <span class="text-center pr-1 text-red-500">
-                        @if($item->user_id == auth()->user()->id)
-                            &<i class="fa-solid fa-angle-right text-blue-400"></i>
-                        @else
-                            <i class="fa-solid fa-angle-left text-blue-400"></i>&
-                        @endif
-                    </span>
+                    <x-shared-symbol :direction="$item->user_id == $this->user->id" />
                     @endif
                     @if($item->start_date)
                     <span class="text-xs text-gray-500 text-right">

@@ -69,6 +69,7 @@ mount(function () {
     $this->total = $this->events->count();
 });
 
+
 $newEvent = function () {
     Event::create([
         'user_id' => auth()->user()->id,
@@ -145,16 +146,54 @@ $sort = function ($by) {
     $this->getEvents();
 };
 
+$notify = function ($event, $about) {
+    foreach ($event->users()->where('user_id', '!=', $this->user->id)->get() as $user) {
+        $user->notifications()->create([
+            'from_id' => $this->user->id,
+            'event' => $about,
+            'resource_type' => 'event',
+            'resource_id' => $event->id,
+        ]);
+    };
+};
+
+$destroyAllEvents = function () {
+    foreach ($this->events as $event) {
+        if ($event->user_id == $this->user->id) {
+            $this->notify($event, 'deleted event');
+            $event->delete();
+        };
+    };
+    $this->getEvents();
+    $this->resetViewDay();
+};
+
+$leaveAllEvents = function () {
+    foreach ($this->events as $event) {
+        if ($event->user_id != $this->user->id) {
+            $this->notify($event, 'left event');
+            $event->users()->detach($this->user->id);
+        };
+    };
+    $this->getEvents();
+    $this->resetViewDay();
+};
+
+on([
+    'delete-all-events' => $destroyAllEvents,
+    'leave-all-events' => $leaveAllEvents,
+]);
+
 updated([
     'searchBy' => $search,
 ]);
 
 ?>
 
-<div class="flex flex-col items-center px-3 pb-3 bg-inherit dark:text-gray-300">
+<div class="flex flex-col items-center px-3 py-3 bg-inherit dark:text-gray-300">
     <div x-data="{ open: false }"
         @close.stop="open = false"
-        class="sticky top-20 w-full py-4 z-10 bg-inherit lg:w-1/3"
+        class="sticky top-20 w-full py-2 z-10 bg-inherit lg:w-1/3"
     >
         <div class="relative flex items-center justify-center pb-1">
             <button
@@ -232,9 +271,13 @@ updated([
                     class="py-1 text-left text-red-500"
                 >{{ $this->showDeletes ? 'hide' : 'show'}} delete buttons</button>
                 <button
-                    wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ '' }}, type: 'events', message: 'Delete all events?' }})"
+                    wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: '', type: 'all-events', message: 'Delete all your events?' }})"
                     class="py-1 text-left text-red-500"
-                >clear all events</button>
+                >delete all owned events</button>
+                <button
+                    wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: '', verb: 'leave', type: 'all-events', message: 'Leave all shared events?' }})"
+                    class="py-1 text-left text-red-500"
+                >leave all events shared with you</button>
             </div>
         </div>
 <!-- END SETTINGS ------------------------------------------------->
@@ -409,13 +452,7 @@ updated([
                     <div class="pr-4">
                         {{ $event->title }}
                         @if($event->users->count() > 1)
-                        <span class="pl-1 text-red-500">
-                            @if($event->user_id == auth()->user()->id)
-                                &<span class="fa-solid fa-angle-right text-blue-400"></span>
-                            @else
-                                <span class="fa-solid fa-angle-left text-blue-400"></span>&
-                            @endif
-                        </span>
+                        <x-shared-symbol :direction="$event->user_id == $this->user->id" />
                         @endif
                     </div>
                     <div class="">

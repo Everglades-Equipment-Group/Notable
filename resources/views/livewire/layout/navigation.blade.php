@@ -67,7 +67,7 @@ new class extends Component
                     <x-nav-link href="notifications" :active="request()->routeIs('notifications')" wire:navigate>
                         {{ __('Notifications') }}
                     </x-nav-link>
-                    <x-nav-link href="help" :active="request()->routeIs('help')" wire:navigate>
+                    <x-nav-link wire:click="$dispatch('openModal', { component: 'help-modal' })" class="cursor-pointer">
                         {{ __('Help') }}
                     </x-nav-link>
                 </div>
@@ -143,7 +143,7 @@ new class extends Component
                 <div class="absolute left-0 h-full w-1 bg-red-500"></div>
                 @endif
             </div>
-            <x-responsive-nav-link href="/help" :active="request()->routeIs('help')" wire:navigate>
+            <x-responsive-nav-link wire:click="$dispatch('openModal', { component: 'help-modal' })" @click="open = false">
                 {{ __('Help') }}
             </x-responsive-nav-link>
         </div>

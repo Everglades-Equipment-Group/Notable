@@ -34,7 +34,7 @@ on(['delete-notifications' => $clear]);
 ?>
 
 <div class="relative flex flex-col items-center p-3 dark:text-gray-300">
-    <div class="w-1/2">
+    <div class="lg:w-1/2">
         <div class="text-center text-xl tracking-wide">Notifications</div>
         <button
             wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { type: 'notifications', message: 'Delete all notifications?' }})"

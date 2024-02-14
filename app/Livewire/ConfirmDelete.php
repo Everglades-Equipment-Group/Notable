@@ -7,8 +7,8 @@ use LivewireUI\Modal\ModalComponent;
 class ConfirmDelete extends ModalComponent
 {
     public $id = '';
-    public $type;
     public $verb = 'delete';
+    public $type;
     public $message = '';
 
     public function mount($type, $message)

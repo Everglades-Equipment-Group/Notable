@@ -4,8 +4,11 @@ use function Livewire\Volt\{mount, state};
 use App\Models\Notification;
 use App\Models\User;
 use App\Models\Note;
+use App\Models\Record;
+use App\Models\Event;
 
 state([
+    'user' => auth()->user(),
     'notification' => '',
     'read' => '',
     'who' => '',
@@ -17,11 +20,20 @@ state([
 $getResourceTitle = function () {
     switch ($this->where) {
         case 'note':
-            $this->where = Note::find($this->notification->resource_id)->title;
+            if (Note::find($this->notification->resource_id)) {
+                $this->where = Note::find($this->notification->resource_id)->title;
+            };
             break;
-        // case 'record':
-        //     return Record::find($this->notification->resource_id)->title;
-        //     break;
+        case 'record':
+            if (Record::find($this->notification->resource_id)) {
+                $this->where = Record::find($this->notification->resource_id)->title;
+            };
+            break;
+        case 'event':
+            if (Event::find($this->notification->resource_id)) {
+                $this->where = Event::find($this->notification->resource_id)->title;
+            };
+            break;
     };
 };
 
@@ -29,7 +41,7 @@ mount(function () {
     if ($this->notification) {
         $this->read = $this->notification->read;
         $this->who = User::find($this->notification->from_id)->name;
-        $this->what = $this->notification->event;
+        $this->what = str_replace($this->user->name, 'you', $this->notification->event);
         $this->where = $this->notification->resource_type;
         $this->when = $this->notification->created_at->diffForHumans();
 
