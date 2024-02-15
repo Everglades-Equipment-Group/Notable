@@ -57,6 +57,14 @@ rules([
     'shareWith.in' => 'User not found.',
 ]);
 
+$toZone = function ($date) {
+    return CarbonImmutable::parse($date)->setTimezone('America/New_York')->format('Y-m-d\TH:i');
+};
+
+$toUTC = function ($date) {
+    return CarbonImmutable::parse($date, 'America/New_York')->setTimezone('UTC')->format('Y-m-d\TH:i');
+};
+
 $getChart = function () {
     $this->chartData[strval($this->id)] = [
         'title' => $this->title,
@@ -73,8 +81,8 @@ $getChart = function () {
 $getEntries = function () {
     $this->entries = $this->record->entries()
                     ->where([
-                        ['created_at', '>=', $this->from],
-                        ['created_at', '<=', $this->to],
+                        ['created_at', '>=', $this->toUTC($this->from)],
+                        ['created_at', '<=', CarbonImmutable::parse($this->toUTC($this->to))->addMinute()],
                     ])
                     ->orderBy($this->sortBy, $this->sortDirection)
                     ->get();
@@ -134,8 +142,8 @@ mount(function () {
         $this->showTimeframe = $this->pivot['show_timeframe'];
         $this->totalEntries = $this->record->entries()->count();
         if ($this->record->entries()->first()) {
-            $this->from = CarbonImmutable::parse($this->record->entries()->oldest()->first()->created_at)->setTimezone('America/New_York')->format('Y-m-d\Th:i');
-            $this->to = CarbonImmutable::parse($this->record->entries()->latest()->first()->created_at)->setTimezone('America/New_York')->format('Y-m-d\Th:i');
+            $this->from = $this->toZone($this->record->entries()->oldest()->first()->created_at);
+            $this->to = $this->toZone($this->record->entries()->latest()->first()->created_at);
         };
         $this->getEntries();
     };
@@ -289,11 +297,10 @@ $toggleAccess = function ($user, $access, $value) {
     $this->record->users()->updateExistingPivot($user, [$access => ! $value]);
 };
 
-// $clearNewText = function () {
-//     if ($this->title == 'New Record') {
-//         $this->title->focus();
-//     };
-// };
+$test = function () {
+    // $this->js('console.log($wire.to)');
+    dd(CarbonImmutable::parse($this->to)->addMinute());
+};
 
 on([
     'delete-record' => $destroy,
@@ -362,6 +369,11 @@ updated([
             @else
             <div class="h-6 w-6"></div>
             @endif
+        </div>
+        <div wire:click="test"
+            class="m-2 text-2xl font-medium text-red-400"
+        >
+            TEST
         </div>
 <!-- SETTINGS ------------------------------------------------------------------------->
         <div x-show="open"

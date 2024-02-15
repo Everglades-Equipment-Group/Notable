@@ -55,16 +55,16 @@ new class extends Component
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link href="notes" :active="request()->routeIs('notes')" wire:navigate>
+                    <x-nav-link href="/notes" :active="request()->routeIs('notes')" wire:navigate>
                         {{ __('Notes') }}
                     </x-nav-link>
-                    <x-nav-link href="records" :active="request()->routeIs('records')" wire:navigate>
+                    <x-nav-link href="/records" :active="request()->routeIs('records')" wire:navigate>
                         {{ __('Records') }}
                     </x-nav-link>
-                    <x-nav-link href="events" :active="request()->routeIs('events')" wire:navigate>
+                    <x-nav-link href="/events" :active="request()->routeIs('events')" wire:navigate>
                         {{ __('Events') }}
                     </x-nav-link>
-                    <x-nav-link href="notifications" :active="request()->routeIs('notifications')" wire:navigate>
+                    <x-nav-link href="/notifications" :active="request()->routeIs('notifications')" wire:navigate>
                         {{ __('Notifications') }}
                     </x-nav-link>
                     <x-nav-link wire:click="$dispatch('openModal', { component: 'help-modal' })" class="cursor-pointer">
