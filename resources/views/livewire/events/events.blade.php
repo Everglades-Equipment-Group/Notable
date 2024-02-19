@@ -59,10 +59,11 @@ $buildMonth = function ($month, $year) {
 
 mount(function () {
     $this->getEvents();
-    $this->calendar = $this->buildMonth(CarbonImmutable::now()->month, CarbonImmutable::now()->year);
     if (session('viewDate')) {
+        $this->calendar = $this->buildMonth(CarbonImmutable::parse(session('viewDate'))->month, CarbonImmutable::parse(session('viewDate'))->year);
         $this->viewDay = session('viewDate');
     } else {
+        $this->calendar = $this->buildMonth(CarbonImmutable::now()->month, CarbonImmutable::now()->year);
         $this->viewDay = CarbonImmutable::now()->setTimezone('EST')->format('Y-m-d');
     };
     $this->viewEvents = $this->events->where('start_date', '=', $this->viewDay)->sortBy('start_time');
@@ -446,7 +447,7 @@ updated([
         @foreach($this->viewEvents as $event)
             <div wire:key="{{ $event->id }}"
                 wire:click="viewEvent({{ $event->id }})"
-                class="flex flex-col w-full justify-between items-center text-left my-2"
+                class="flex flex-col w-full justify-between items-center text-left my-2 cursor-pointer"
             >
                 <div class="flex w-full justify-between">
                     <div class="pr-4">

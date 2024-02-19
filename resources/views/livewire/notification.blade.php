@@ -18,22 +18,21 @@ state([
 ]);
 
 $getResourceTitle = function () {
-    switch ($this->where) {
+
+    switch ($this->notification->resource_type) {
         case 'note':
-            if (Note::find($this->notification->resource_id)) {
-                $this->where = Note::find($this->notification->resource_id)->title;
-            };
+            $model = Note::class;
             break;
         case 'record':
-            if (Record::find($this->notification->resource_id)) {
-                $this->where = Record::find($this->notification->resource_id)->title;
-            };
+            $model = Record::class;
             break;
         case 'event':
-            if (Event::find($this->notification->resource_id)) {
-                $this->where = Event::find($this->notification->resource_id)->title;
-            };
+            $model = Event::class;
             break;
+    };
+
+    if ($model::find($this->notification->resource_id)) {
+        $this->where = $model::find($this->notification->resource_id)->title;
     };
 };
 

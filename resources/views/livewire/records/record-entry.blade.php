@@ -55,6 +55,7 @@ updated([
     'amount' => function () {
         $this->validate();
         $this->entry->update(['amount' => $this->amount]);
+        $this->dispatch('entry-updated');
     },
     'info' => fn () => $this->entry->update(['info' => $this->info]),
     'time' => fn () => $this->datetimeUpdated(),

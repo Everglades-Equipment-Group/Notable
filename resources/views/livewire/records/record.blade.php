@@ -172,7 +172,9 @@ $destroy = function (Record $record) {
 };
 
 $createNewEntry = function () {
-    $this->validate(['newEntry' => 'numeric']);
+    if ($this->newEntry != '') {
+
+        $this->validate(['newEntry' => 'numeric']);
 
         $this->record->entries()->create([
             'amount' => $this->newEntry
@@ -183,6 +185,7 @@ $createNewEntry = function () {
         $this->getEntries();
 
         $this->notify('added entry to record');
+    };
 };
 
 $sort = function ($sortBy) {
@@ -309,7 +312,6 @@ on([
     'leave-record' => $leaveRecord,
 ]);
 
-booted(fn () => $getEntries);
 updated([
     'title' => function () {
         $this->notify('renamed record: '. $this->record->title .' to');

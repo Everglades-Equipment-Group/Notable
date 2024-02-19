@@ -1,15 +1,24 @@
 <?php
 
-use function Livewire\Volt\{state};
+use function Livewire\Volt\{state, mount};
 
 state([
     'data',
     'user' => auth()->user(),
     'type' => '',
     'id' => 0,
-    'sortBy' => '',
+    'sortBy' => 'created_at',
     'sortDirection' => 'asc',
 ]);
+
+$getData = function () {
+    $this->data = $this->user->{$this->type.'s'}()->orderBy($this->sortBy, $this->sortDirection)->get();
+};
+
+mount(function ($type) {
+    $this->type = $type;
+    $this->getData();
+});
 
 $newItem = function () {
     session()->flash('id', $this->id );
@@ -31,8 +40,8 @@ $sort = function ($sortBy) {
     };
 
     $this->sortBy = $sortBy;
-    $this->dispatch('sort-'.$this->type.'s', type: $this->type, sortBy: $this->sortBy, sortDirection: $this->sortDirection);
-    // $this->js('console.log("sort-'.$this->type.'s by '.$this->sortBy.' '.$this->sortDirection.'")');
+
+    $this->getData();
 };
 
 $viewAll = function () {
