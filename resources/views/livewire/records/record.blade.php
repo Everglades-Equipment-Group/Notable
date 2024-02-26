@@ -91,6 +91,13 @@ $getEntries = function () {
     $this->getChart();
 };
 
+$getTimeframe = function () {
+    if ($this->record->entries()->first()) {
+        $this->from = $this->toZone($this->record->entries()->oldest()->first()->created_at);
+        $this->to = $this->toZone($this->record->entries()->latest()->first()->created_at);
+    };
+};
+
 mount(function () {
     if ($this->id == 0) {
 
@@ -141,10 +148,8 @@ mount(function () {
         $this->showTotal = $this->pivot['show_total'];
         $this->showTimeframe = $this->pivot['show_timeframe'];
         $this->totalEntries = $this->record->entries()->count();
-        if ($this->record->entries()->first()) {
-            $this->from = $this->toZone($this->record->entries()->oldest()->first()->created_at);
-            $this->to = $this->toZone($this->record->entries()->latest()->first()->created_at);
-        };
+
+        $this->getTimeframe();
         $this->getEntries();
     };
 
@@ -181,7 +186,8 @@ $createNewEntry = function () {
         ]);
         
         $this->newEntry = '';
-        
+
+        $this->getTimeFrame();
         $this->getEntries();
 
         $this->notify('added entry to record');
@@ -307,7 +313,10 @@ $test = function () {
 
 on([
     'delete-record' => $destroy,
-    'delete-entry' => $getEntries,
+    'delete-entry' => function () {
+        $this->getTimeFrame();
+        $this->getEntries();
+    },
     'entry-updated' => $getEntries,
     'leave-record' => $leaveRecord,
 ]);

@@ -7,16 +7,30 @@ state([
     'user' => auth()->user(),
     'type' => '',
     'id' => 0,
-    'sortBy' => 'created_at',
-    'sortDirection' => 'asc',
+    'sortBy' => '',
+    'sortDirection' => '',
 ]);
 
 $getData = function () {
-    $this->data = $this->user->{$this->type.'s'}()->orderBy($this->sortBy, $this->sortDirection)->get();
+    // $this->data = $this->user->{$this->type.'s'}()->orderBy($this->sortBy, $this->sortDirection)->get();
+    $this->data = $this->user->{$this->type.'s'}()->get()->sortBy(function($item) {
+        if ($this->sortBy == 'shared_by') {
+            return $item->users->count() > 1 && $item->user_id == $this->user->id;
+        };
+
+        if ($this->sortBy == 'shared_with') {
+            return $item->users->count() > 1 && $item->user_id != $this->user->id;
+        };
+
+        return $item->{$this->sortBy};
+
+    }, SORT_REGULAR, $this->sortDirection == 'asc');
 };
 
 mount(function ($type) {
     $this->type = $type;
+    $this->sortBy = $this->user->usersettings->{'sort_'.$type.'s_by'};
+    $this->sortDirection = $this->user->usersettings->{'sort_'.$type.'s_direction'};
     $this->getData();
 });
 
@@ -40,6 +54,9 @@ $sort = function ($sortBy) {
     };
 
     $this->sortBy = $sortBy;
+    $this->user->usersettings->{'sort_'.$this->type.'s_by'} = $this->sortBy;
+    $this->user->usersettings->{'sort_'.$this->type.'s_direction'} = $this->sortDirection;
+    $this->user->usersettings->save();
 
     $this->getData();
 };
@@ -83,10 +100,16 @@ $viewAll = function () {
                 x-transition:leave-end="opacity-0 scale-95"
                 style="display: none;"
                 @click="open = false"
-                class="absolute z-10 p-2 rounded-md shadow-lg border border-t-0 border-e-0 border-gray-500 bg-inherit"
+                class="absolute flex flex-col items-left z-10 p-2 rounded-md shadow-lg border border-blue-400 bg-inherit"
             >
                 <button wire:click="sort('title')" class="py-1">Alpha</button>
                 <button wire:click="sort('created_at')" class="py-1">Chrono</button>
+                <button wire:click="sort('shared_by')" class="py-1">
+                    <x-shared-symbol :direction="true"/>
+                </button>
+                <button wire:click="sort('shared_with')" class="py-1">
+                    <x-shared-symbol :direction="false"/>
+                </button>
             </div>
         </div>
     </div>

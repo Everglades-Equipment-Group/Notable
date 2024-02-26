@@ -226,13 +226,14 @@ updated([
                 class="fa-solid fa-sliders text-2xl text-blue-400"
                 title="options"
             ></button>
-            <x-text-input 
+            <textarea 
                 wire:model.change="title"
                 @focus="$event.target.select()"
+                rows="{{ 1 + strlen($this->title) / 25 }}"
                 placeholder="Title"
-                class="text-2xl border-none text-center focus:border"
-                disabled="{{ ! $this->can_edit }}"
-            />
+                class="text-2xl border-none rounded-md text-center bg-inherit focus:border focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                {{ $this->can_edit ? '' : 'readonly'}}
+            ></textarea>
             @if($this->isOwner)
             <button
                 wire:click="$dispatch('openModal', { component: 'confirm-delete', arguments: { id: {{ $this->event->id }}, type: 'event', message: 'Delete this event?' }})"
